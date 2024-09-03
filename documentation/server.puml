@@ -1,0 +1,23 @@
+
+[Edit online] 	
+
+@startuml
+participant Server
+participant Victim
+participant Hacker
+
+group Victim connects to server
+
+    Victim -> Server: Connexion
+    Server -> Victim: Retrieve IP, userlist, start a dump of /Documents folder
+    Server -> Victim: Execute persistency script and install backdoor
+end
+group Hacker -> client
+
+    Hacker -> Server: Retrieve IP list GET /victims
+    Hacker -> Server: Choose a victim
+    Server -> Hacker: Victim's information (userlist, etc...)
+    Hacker -> Server: Can execute action from action list (ex Keylogger) or execute custom command
+
+end
+@enduml
