@@ -6,7 +6,7 @@ load_dotenv()
 
 class UserRepository:
     def __init__(self):
-        self.users_file = os.getenv('DATA_PATH') + '/users.json'
+        self.users_file = os.getenv('DATA_PATH') + '/users/users.json'
         self.ensure_data_directory_exists()
         self.users = self.load_users()
         
