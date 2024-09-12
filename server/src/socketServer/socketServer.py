@@ -1,9 +1,7 @@
 import asyncio
-import json
-import os
 from classes.user import User
 from data.dataManager import DataManager
-from data.userRepository import UserRepository
+from data.users.userRepository import UserRepository
 
 
 class SocketServer:

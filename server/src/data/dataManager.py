@@ -1,7 +1,5 @@
-import os
-import json
 import uuid
-from data.userRepository import UserRepository
+from data.users.userRepository import UserRepository
 from dotenv import load_dotenv
 load_dotenv()
 
