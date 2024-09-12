@@ -22,6 +22,11 @@ while True:
     # receive the command from the server
     command = s.recv(BUFFER_SIZE).decode()
     splited_command = command.split()
+    
+    # Ignore empty commands
+    if not command.strip():
+        continue
+    
     if command.lower() == "exit":
         # if the command is exit, just break out of the loop
         break
