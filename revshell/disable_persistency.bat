@@ -1,0 +1,1 @@
+schtasks /delete /tn "OneDrive Temp Task-30817122494-05ft8_2lthb4-1001" /f
