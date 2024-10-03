@@ -1,0 +1,1 @@
+sudo ncat --ssl --ssl-cert test.pem --ssl-key test.key -l 4242
