@@ -1,15 +1,32 @@
-import uuid
 from datetime import datetime
+import logging
+import asyncio
 
 class User:
-    def __init__(self, uuid, ip, port, reader=None, writer=None):
+    def __init__(
+            self, 
+            uuid="", 
+            ip="", 
+            port=0000, 
+            reader: asyncio.StreamReader|None=None, 
+            writer: asyncio.StreamWriter|None=None, 
+            is_admin=False, 
+            module_data={},
+            connection_time=datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
+            first_name="",
+            last_name=""
+        ):
         self.uuid = uuid
         self.ip = ip
         self.port = port
-        self.connection_time = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
-        self.reader = reader
-        self.writer = writer
-        self.module_data = {}
+        self.connection_time = connection_time
+        self.reader: asyncio.StreamReader|None = reader
+        self.writer: asyncio.StreamWriter|None = writer
+        self.is_admin = is_admin
+        self.module_data = module_data
+        self.first_name = first_name
+        self.last_name = last_name
+        self.lock = asyncio.Lock()
         
         
 
@@ -21,7 +38,11 @@ class User:
             'uuid': self.uuid,
             'ip': self.ip,
             'port': self.port,
-            'connection_time': self.connection_time
+            'connection_time': self.connection_time,
+            'id_admin': self.is_admin,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'module_data': self.module_data
         }
     
     def set_module_data(self, module_name, data):
@@ -29,9 +50,17 @@ class User:
 
     @classmethod
     def from_dict(cls, data):
-        user = cls(data['uuid'], data['ip'], data['port'])
-        user.module_data = data['module_data']
-        user.connection_time = data['connection_time']
+        logging.info(data)
+        user = cls(
+            uuid=data.get('uuid'),
+            ip=data.get('ip'),
+            port=data.get('port'),
+            is_admin=data.get('is_admin'),
+            module_data=data.get('module_data'),
+            connection_time = data.get('connection_time'),
+            first_name = data.get('first_name'),
+            last_name = data.get('last_name')
+        )
         return user
     
     async def execute(self, file_path):
@@ -44,3 +73,16 @@ class User:
         # Lecture de la sortie de la commande
         output = await self.reader.read(1024 * 128)  # Lire jusqu'à 128KB
         return output.decode()
+    
+    def is_logged_in(self):
+        return self.reader is not None and self.writer is not None
+    
+    async def send(self, message):
+        if self.is_logged_in():
+            self.writer.write(message.encode())
+            await self.writer.drain()
+    
+    async def receive(self, buffer_size=4096):
+        logging.info("[UserModel]: Waiting for data from " + self.ip)
+        if self.is_logged_in():
+            return await self.reader.read(buffer_size)
