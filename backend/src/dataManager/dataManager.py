@@ -1,5 +1,5 @@
 import uuid
-from server.src.classes.userRepository import UserRepository
+from dataManager.repository.userRepository import UserRepository
 from dotenv import load_dotenv
 load_dotenv()
 
