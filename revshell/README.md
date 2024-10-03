@@ -11,6 +11,9 @@
   - [Start a listener  :](#start-a-listener--)
   - [Execute the built installer.exe](#execute-the-built-installerexe)
 - [Detection](#detection)
+  - [VirusTotal](#virustotal)
+  - [Hybrid Analysis](#hybrid-analysis)
+  - [DocGuard](#docguard)
 - [Removal](#removal)
 
 
@@ -158,6 +161,8 @@ print(os.listdir())
 
 # Detection
 
+## VirusTotal
+
 At the time of writing this document, only one AV (SecureAge) is flagging the installer.exe program as possibly malicious :
 
 [Link](https://www.virustotal.com/gui/file/055e2622a4b51aea15bd9cb425dc35409f314f4f87815680f7a03cf367e2b087/detection)
@@ -171,6 +176,16 @@ And two for the revshell.exe (which is written on disk later on) :
 ![virustotal result revshell.exe](imgs/revshell_exe_virustotal.png)
 
 Microsoft defender does not detect the program.
+
+## Hybrid Analysis
+
+![hybrid analyzer results sandboxed](imgs/installer_hybrid_analyzer_sandboxed.png)
+
+![hybrid analyzer results static](imgs/installer_hybrid_analysis_static.png)
+
+## DocGuard
+
+DocGuard report: [link]([link](https://app.docguard.io/055e2622a4b51aea15bd9cb425dc35409f314f4f87815680f7a03cf367e2b087/639bf41b-4dfc-45f7-8273-521249eb9c9e/0/results/dashboard))
 
 # Removal
 
