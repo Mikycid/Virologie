@@ -9,6 +9,7 @@ class User:
         self.connection_time = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
         self.reader = reader
         self.writer = writer
+        self.module_data = {}
         
         
 
@@ -20,12 +21,16 @@ class User:
             'uuid': self.uuid,
             'ip': self.ip,
             'port': self.port,
-            'connection_time': self.connection_time,
+            'connection_time': self.connection_time
         }
+    
+    def set_module_data(self, module_name, data):
+        self.module_data[module_name] = data
 
     @classmethod
     def from_dict(cls, data):
-        user = cls(data['ip'], data['port'], data['uuid'])
+        user = cls(data['uuid'], data['ip'], data['port'])
+        user.module_data = data['module_data']
         user.connection_time = data['connection_time']
         return user
     

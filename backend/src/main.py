@@ -1,33 +1,44 @@
+# main.py
+from logs.logger import setup_logging
+setup_logging()
+
 import os
 import asyncio
 import uvicorn
-from socketServer.socketServer import SocketServer
+from socketServer.socketServer import SocketServer  # Adjust import based on your structure
 from dataManager.dataManager import DataManager
 from dotenv import load_dotenv
-from api import api  # Importer l'application FastAPI de app.py
+from app_state import AppState  # Import the AppState class
+from api.api import create_app  # Import the create_app function
 
-# Charger les variables d'environnement
+# Load environment variables
 load_dotenv()
+data_manager = DataManager()
 
-# Fonction pour démarrer le serveur FastAPI
+# Create the shared state object
+app_state = AppState(data_manager)
+
+# Create the FastAPI app with the shared state
+fastapi_app = create_app(app_state)
+
+# Function to start the FastAPI server
 async def start_fastapi():
-    config = uvicorn.Config("app:app", host=os.getenv('API_HOST'), port=os.getenv('API_PORT'), log_level="info")
+    config = uvicorn.Config(app=fastapi_app, host=os.getenv('API_HOST'), port=int(os.getenv('API_PORT')), log_level="info", reload=True)
     server = uvicorn.Server(config)
     await server.serve()
 
-# Fonction pour démarrer le serveur socket
+# Function to start the socket server
 async def start_socket_server():
-    data_manager = DataManager()
-    socket_server = SocketServer(os.getenv('SOCKET_HOST'), os.getenv('SOCKET_PORT'), data_manager)
+    socket_server = SocketServer(os.getenv('SOCKET_HOST'), int(os.getenv('SOCKET_PORT')), app_state.data_manager)
     await socket_server.start()
 
-# Fonction principale qui lance les deux serveurs en parallèle
+# Main function to run both servers concurrently
 async def main():
     await asyncio.gather(
-        start_fastapi(),         # Lancer FastAPI
-        start_socket_server()    # Lancer le serveur socket
+        start_socket_server(),  # Launch the socket server
+        start_fastapi()         # Launch the FastAPI server
     )
 
 if __name__ == "__main__":
-    # Lancer la boucle asyncio avec les deux serveurs
+    # Run the asyncio loop with both servers
     asyncio.run(main())
