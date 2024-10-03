@@ -29,7 +29,7 @@ async def start_fastapi():
 
 # Function to start the socket server
 async def start_socket_server():
-    socket_server = SocketServer(os.getenv('SOCKET_HOST'), int(os.getenv('SOCKET_PORT')), app_state.data_manager)
+    socket_server = SocketServer(app_state, os.getenv('SOCKET_HOST'), int(os.getenv('SOCKET_PORT')))
     await socket_server.start()
 
 # Main function to run both servers concurrently

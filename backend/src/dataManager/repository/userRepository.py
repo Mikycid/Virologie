@@ -44,17 +44,27 @@ class UserRepository:
 
     def add_user(self, user):
         """Add a new user and save them as an individual JSON file."""
+        user_file_path = os.path.join(self.users_dir, f"{user.uuid}.json")
+        
+        # Check if the user file exists
+        if os.path.exists(user_file_path):
+            # Load existing user data from file
+            with open(user_file_path, 'r') as f:
+                existing_data = json.load(f)
+                user.module_data.update(existing_data.get('module_data', {}))  # Update module_data
+
+        # Save the user, regardless of whether they existed or not
         self.users[user.uuid] = user
         self.save_user(user)
-        print(f"Utilisateur ajouté: {user}")
 
     def get_user(self, uuid) -> User:
         """Retrieve a user by UUID."""
         return self.users.get(uuid)
     
-    def get_users(self):
-        """Retrieve all users."""
-        return [x.to_dict() for x in list(self.users.values())]
+    def get_user_list(self):
+        """Retrieve all users with an additional 'logged' key indicating login status."""
+        return [{**x.to_dict(), "logged": x.is_logged_in()} for x in self.users.values()]
+
     
     def set_user_module_data(self, uuid, module_name, data):
         """Set module-specific data for a user."""
@@ -62,22 +72,19 @@ class UserRepository:
         if user:
             user.set_module_data(module_name, data)
             self.save_user(user)
-            print(f"Données du module {module_name} définies pour {user}")
         else:
-            print(f"Impossible de définir les données du module {module_name} pour l'utilisateur {uuid}: utilisateur introuvable.")
+            logging.error(f"Impossible de définir les données du module {module_name} pour l'utilisateur {uuid}: utilisateur introuvable.")
     
     def save_user(self, user: User):
         """Save a single user to a separate JSON file."""
         filepath = os.path.join(self.users_dir, f"{user.uuid}.json")
         with open(filepath, 'w') as f:
             json.dump(user.to_dict(), f)
-        print(f"Utilisateur sauvegardé dans {filepath}")
 
     def save_users(self):
         """Save all users individually."""
         for user in self.users.values():
             self.save_user(user)
-        print(f"Tous les utilisateurs ont été sauvegardés dans {self.users_dir}")
     
     def remove_user(self, user):
         """Remove a user both from memory and from the filesystem."""
@@ -86,5 +93,3 @@ class UserRepository:
             filepath = os.path.join(self.users_dir, f"{user.uuid}.json")
             if os.path.exists(filepath):
                 os.remove(filepath)
-                print(f"Fichier utilisateur supprimé: {filepath}")
-            print(f"Utilisateur supprimé: {user}")
