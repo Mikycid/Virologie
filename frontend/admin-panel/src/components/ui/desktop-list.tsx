@@ -1,38 +1,30 @@
-import { Button } from "@/components/ui/shadcn/button"
-import {
-  Sheet,
-  // SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/shadcn/sheet.tsx"
+import { useEffect, useState } from "react";
+import {User} from "@/Interfaces/User.ts";
 
-export function DesktopList() {
+export function DesktopList({ selectedUser, setSelectedUser }: { selectedUser: User | null, setSelectedUser: (user: User) => void }) {
+    const [users, setUsers] = useState<Object[]>([]);
 
+    useEffect(() => {
+        fetch("http://localhost:8000/api/users")
+            .then(async r => {
+                const data = await r.json();
+                setUsers(data);
+            });
+    }, []);
 
-  fetch("http://localhost:8080/users")
-
-  return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="outline" className="bg-dark/50 border border-green-500 text-green-600">List of infected users</Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="bg-dark border border-green-500">
-        <SheetHeader>
-          <SheetTitle className="text-green-500 ">List of infected users</SheetTitle>
-          <SheetDescription>
-            Chose one of the following infected users to start messing with their PC.
-          </SheetDescription>
-        </SheetHeader>
-        <SheetFooter>
-
-
-
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  )
+    return (
+        <div className="mr-4 space-y-4 text-green-500">
+            {users.map((user: any) => (
+                <div key={user.uuid}
+                     className={
+                         user === selectedUser ? "border border-green-500 p-3 rounded-lg cursor-pointer bg-green-300 text-black animate-pulse shadow-xl shadow-green-500/50" : "border border-green-500 p-3 rounded-lg cursor-pointer hover:border-green-400 hover:bg-green-300 hover:text-black  shadow-md shadow-green-500/50"
+                     }
+                     onClick={() => setSelectedUser(user)}
+                >
+                    <p><strong>UUID:</strong> {user.uuid}</p>
+                    <p><strong>IP:</strong> {user.ip}</p>
+                </div>
+            ))}
+        </div>
+    );
 }

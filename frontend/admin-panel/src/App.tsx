@@ -1,26 +1,27 @@
 'use client'
 
-import {Button} from "@/components/ui/shadcn/button.tsx"
 import Interface from "@/components/ui/interface.tsx";
-import {DesktopList} from "@/components/ui/desktop-list.tsx";
+import { DesktopList } from "@/components/ui/desktop-list.tsx";
+import { useState } from "react";
+import {User} from "@/Interfaces/User.ts";
 
 export default function AdminPanel() {
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
     return (
-        <div className="min-h-screen bg-black text-green-500 p-4 font-mono">
-            <DesktopList />
-            <div className="max-w-4xl mx-auto bg-black/50 rounded-lg shadow-lg overflow-hidden border border-green-500">
-                <Interface />
-                <div className="flex justify-center pb-4">
-                    <Button
-                        className="mr-4 bg-green-900/50 hover:bg-green-700/50 text-green-400 border border-green-500 shadow-lg shadow-green-500/50">
-                        Activate
-                    </Button>
-                    <Button
-                        className="bg-red-900/50 hover:bg-red-700/50 text-red-400 border border-red-500 shadow-lg shadow-red-500/50">
-                        Deactivate
-                    </Button>
+        <div className="h-screen bg-black p-4">
+            <div className="h-full text-green-500 font-mono">
+                <div className="h-full grid grid-rows-1 grid-cols-3 gap-1">
+
+                    <div className="col-span-1">
+                        <DesktopList selectedUser={selectedUser} setSelectedUser={setSelectedUser}/>
+                    </div>
+                    <div
+                        className="col-span-2 w-full mx-auto bg-black/50 rounded-lg shadow-lg overflow-hidden border border-green-500">
+                        <Interface selectedUser={selectedUser}/>
+                    </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
