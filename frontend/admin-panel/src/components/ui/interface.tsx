@@ -3,6 +3,7 @@ import {Button} from "@/components/ui/shadcn/button.tsx";
 import {ScrollArea} from "@/components/ui/shadcn/scroll-area.tsx";
 import {User} from "@/Interfaces/User.ts";
 import {KeyloggerButtons} from "@/components/ui/keylogger-buttons.tsx";
+import {VPNButtons} from "@/components/ui/vpn-buttons.tsx";
 
 export default function Interface({selectedUser}: { selectedUser: User | null }) {
     const [output, setOutput] = useState<string[]>([]);
@@ -43,7 +44,7 @@ export default function Interface({selectedUser}: { selectedUser: User | null })
 
     const commands = [
         {name: 'Keylogger', command: 'keylogger'},
-        {name: 'Decrypt Database', command: 'decrypt_db'},
+        {name: 'VPN', command: 'vpn'},
         {name: 'Launch Virus', command: 'launch_virus'},
         {name: 'Trace IP', command: 'trace_ip'},
         {name: 'Hack Mainframe', command: 'hack_mainframe'},
@@ -82,6 +83,12 @@ export default function Interface({selectedUser}: { selectedUser: User | null })
                 selectedModule === 'keylogger' && (
                     <div className="mt-4">
                         <KeyloggerButtons typeOutput={(text: string) => typeOutput(text)} selectedUser={selectedUser} clearConsole={() => clearConsole()} setOutput={(value: React.SetStateAction<string[]>) => setOutput(value)} />
+                    </div>
+                ) 
+            }
+            {selectedModule === 'vpn' && (
+                    <div className="mt-4">
+                        <VPNButtons typeOutput={(text: string) => typeOutput(text)} selectedUser={selectedUser} clearConsole={() => clearConsole()} setOutput={(value: React.SetStateAction<string[]>) => setOutput(value)} />
                     </div>
                 )
             }

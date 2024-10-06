@@ -13,7 +13,7 @@ class VpnManager:
             return
         logging.info(f"Installing vpn for user with uuid {uuid}")
         result = await user.execute("./modules/payloads/payload_install_vpn.py")
-        logging.info("result: " + result)
+        logging.info("result: " + str(result))
         return {"message": result}
 
     async def connect_to_vpn(self, uuid):

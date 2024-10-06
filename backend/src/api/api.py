@@ -11,7 +11,7 @@ def create_app(app_state):
     # Add CORS middleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173"],  # Allows all origins; specify the frontend origin(s) here for security
+        allow_origins=["http://localhost:5173", "http://localhost:3000"],  # Allows all origins; specify the frontend origin(s) here for security
         allow_credentials=True,
         allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, etc.)
         allow_headers=["*"],  # Allow all headers
