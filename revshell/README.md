@@ -11,6 +11,7 @@
   - [Start a listener  :](#start-a-listener--)
   - [Execute the built installer.exe](#execute-the-built-installerexe)
 - [Detection](#detection)
+  - [Windows Defender](#windows-defender)
   - [VirusTotal](#virustotal)
   - [Hybrid Analysis](#hybrid-analysis)
   - [DocGuard](#docguard)
@@ -161,21 +162,31 @@ print(os.listdir())
 
 # Detection
 
+## Windows Defender
+
+Microsoft defender does not detect the installer, neither the reverse shell.
+
+Though, during the tests, sometimes it detected the installer.exe later for a persistence technique and removed the exe.
+
+This only happened after executing the installer multiple times, probably because it executes a MS-DOS code that creates a task that will execute the program every X minutes, so it is detected in runtime analysis.
+
+In the end, the task was not deleted, and no more alerts were raised, as the virus kept running. 
+
+Establishing persistency before installing the real code by separating the process into two distincts executables is a hiding technique from defender.
+
 ## VirusTotal
 
-At the time of writing this document, only one AV (SecureAge) is flagging the installer.exe program as possibly malicious :
+At the time of writing this document, the program is not flagged as possibly malicious :
 
-[Link](https://www.virustotal.com/gui/file/055e2622a4b51aea15bd9cb425dc35409f314f4f87815680f7a03cf367e2b087/detection)
+[Link](https://www.virustotal.com/gui/file/2366781a097e23c90b7a06b0ffd9ac3e1fe0e3ea3e75d21cc2ddbba316c1ecdf?nocache=1)
 
 ![virustotal result installer.exe](imgs/installer_exe_virustotal.png)
 
-And two for the revshell.exe (which is written on disk later on) : 
+Same for the revshell.exe (which is written on disk later on) : 
 
-[Link](https://www.virustotal.com/gui/file/5fbbff47076c992a524d39fcf40191bbe9cc2d9fb0a2a37c3eb42a373235791e?nocache=1)
+[Link](https://www.virustotal.com/gui/file/ebecbe39d471c4eea52bd3fdbd6c12ffef6d59d9b7bd5d0b3379af317b44bd80?nocache=1)
 
 ![virustotal result revshell.exe](imgs/revshell_exe_virustotal.png)
-
-Microsoft defender does not detect the program.
 
 ## Hybrid Analysis
 

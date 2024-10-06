@@ -64,15 +64,23 @@ class User:
         return user
     
     async def execute(self, file_path):
-        # Commande PowerShell pour exécuter le fichier Python
-        command = f"python3 {file_path}"
-        # Envoi de la commande au client
-        self.writer.write(command.encode())
-        await self.writer.drain()
-        
-        # Lecture de la sortie de la commande
-        output = await self.reader.read(1024 * 128)  # Lire jusqu'à 128KB
-        return output.decode()
+        if not self.is_logged_in():
+            logging.error(f"User {self.ip} is not logged in")
+            return {
+                "error": "User is not logged in"
+            }
+        with open(file_path, "rb") as f:
+            logging.info(f"Executing {file_path} on {self.ip}")
+            self.writer.write(b'print("pause")')
+            async with self.lock:
+                self.writer.write(f.read())
+
+                await self.writer.drain()
+            
+                output = await self.reader.read(4096)
+
+                logging.info(f"Output: {output.decode()}")
+                return output.decode()
     
     def is_logged_in(self):
         return self.reader is not None and self.writer is not None
