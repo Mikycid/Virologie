@@ -1,0 +1,13 @@
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+      
+    volumes:
+      - ./admin-panel:/app
+    ports:
+      - "3000:5173"
+    command: npm run dev
+  
