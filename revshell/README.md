@@ -35,7 +35,7 @@ The following workflow outlines how detection is avoided:
 
 3. **Persistence via Task Scheduler**  
    - The Windows Task Scheduler is used to set up persistence, ensuring that the reverse shell is executed regularly:  
-     - **User mode**: The reverse shell program is executed every minute when the user is logged in.  
+     - **User mode**: The reverse shell program is executed every minute when the user is infected.  
      - **Admin mode**: Managed by later-used services, but the reverse shell program should be executed every minute with a system account, as long as it's powered on.
 
 4. **Establishing Control**  
