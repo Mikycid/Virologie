@@ -7,7 +7,9 @@ def main():
     import signal
     pid = None
     try:
-        output = subprocess.check_output(['tasklist'], universal_newlines=True)
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        output = subprocess.check_output(['tasklist'], universal_newlines=True, startupinfo=si)
 
         # Match either openvpn-gui.exe or openvpn.exe
         match = re.search(r'openvpn(?:-gui)?\.exe\s+(\d+)', output)

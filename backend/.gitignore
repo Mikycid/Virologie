@@ -1,3 +1,4 @@
 storage/
 ./data/
 ./openvpn-data/
+./openvpn-conf/
