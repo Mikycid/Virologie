@@ -39,7 +39,7 @@ class User:
             'ip': self.ip,
             'port': self.port,
             'connection_time': self.connection_time,
-            'id_admin': self.is_admin,
+            'is_admin': self.is_admin,
             'first_name': self.first_name,
             'last_name': self.last_name,
             'module_data': self.module_data
