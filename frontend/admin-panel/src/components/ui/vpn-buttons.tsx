@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
-import { User } from "@/Interfaces/User.ts";
-import { json } from 'stream/consumers';
+import React, {useState} from 'react';
+import {User} from "@/Interfaces/User.ts";
 
 export function VPNButtons (
 {
     typeOutput,
     selectedUser,
-    clearConsole,
     setOutput
 }: {
     typeOutput: (text: string) => Promise<void>,
@@ -89,11 +87,11 @@ export function VPNButtons (
         if (response.ok) {
             const data = await response.json();
             
-            Object.entries(data).forEach(async ([key, value]) => {
+            for (const [key, value] of Object.entries(data)) {
                 await typeOutput("> VPN status check:");
                 setOutput(prev => [...prev, `Network Card Name: "${key}"`]);
                 setOutput(prev => [...prev, `IP Address: ${value}`]);
-            });
+            }
         }
         else {
             const errorData = await response.json();
