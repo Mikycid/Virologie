@@ -4,7 +4,7 @@ from classes.user import User
 from dataManager.dataManager import DataManager
 from dataManager.repository.userRepository import UserRepository
 import logging
-from modules.Keylogger import Keylogger
+from modules.KeyloggerModule import KeyloggerModule
 from modules.Recognizer import Recognizer
 from app_state import AppState
 
@@ -17,7 +17,7 @@ class SocketServer:
         self.certfile = certfile
         self.keyfile = keyfile
         self.lock = app_state.lock
-        self.keylogger = Keylogger(self.user_repository)
+        self.keylogger = KeyloggerModule(self.user_repository)
         self.recognizer = Recognizer(self.user_repository)
 
     async def handle_client(self, reader: asyncio.StreamReader, writer : asyncio.StreamWriter):

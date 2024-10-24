@@ -51,6 +51,7 @@ def main(openvpn_config, config_path):
         # Start the OpenVPN process in the background
         si = subprocess.STARTUPINFO()
         si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        
         subprocess.Popen(
             ['C:\\Program Files\\TAP Driver\\openvpn-portable-win64-2.4.9-I601-8\\app\\win10\\bin\\openvpn-gui.exe',
              '--connect', config_file_name, '--config_dir', os.path.abspath(os.path.dirname(config_path)), 
