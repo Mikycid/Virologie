@@ -79,7 +79,14 @@ export function VPNButtons (
 
     const stopVPN = async () => {
         await typeOutput("> Stopping VPN, please wait...");
-        await fetch("http://localhost:8000/api/modules/vpn/stop?id=" + selectedUser?.uuid);
+        const response = await fetch("http://localhost:8000/api/modules/vpn/stop?id=" + selectedUser?.uuid);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            await typeOutput(`> Failed to stop VPN: ${errorData.detail || response.statusText}`);
+            return;
+        }
+
         await typeOutput("> VPN stopped.");
     };
 
@@ -88,16 +95,34 @@ export function VPNButtons (
         const response = await fetch("http://localhost:8000/api/modules/vpn/status?id=" + selectedUser?.uuid);
         if (response.ok) {
             const data = await response.json();
+            const excluded_interfaces = ["Wi-Fi", "WSL", "Loopback", "Ethernet"];
             
+            await typeOutput("> List of connected interfaces:");
+            
+            // Display the list of connected interfaces
             Object.entries(data).forEach(async ([key, value]) => {
-                await typeOutput("> VPN status check:");
                 setOutput(prev => [...prev, `Network Card Name: "${key}"`]);
                 setOutput(prev => [...prev, `IP Address: ${value}`]);
             });
+        
+            // Identify probable VPN interfaces
+            const probableVPNs = Object.entries(data).filter(
+                ([key, _]) => !excluded_interfaces.some(excluded => key.includes(excluded))
+            );
+        
+            if (probableVPNs.length > 0) {
+                await typeOutput("> Probable VPN Interface(s):");
+                probableVPNs.forEach(async ([key, value]) => {
+                    await typeOutput(`Network Card Name: "${key}"`);
+                    await typeOutput(`IP Address: ${value}`);
+                });
+            } else {
+                await typeOutput("> No probable VPN interface found.");
+            }
         }
         else {
             const errorData = await response.json();
-            await typeOutput(`> Failed to connect to VPN: ${errorData.detail || response.statusText}`);
+            await typeOutput(`> Failed to retrieve to VPN status: ${errorData.detail || response.statusText}`);
         }
     };
 
@@ -108,13 +133,25 @@ export function VPNButtons (
             await typeOutput("> VPN installation cancelled by user.");
             return;
         }
-        await fetch("http://localhost:8000/api/modules/vpn/install?id=" + selectedUser?.uuid);
+        const response = await fetch("http://localhost:8000/api/modules/vpn/install?id=" + selectedUser?.uuid);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            await typeOutput(`> Failed to install VPN: ${errorData.detail || response.statusText}`);
+            return;
+        }
         await typeOutput("> VPN installed.");
     };
 
     const uninstallVPN = async () => {
         await typeOutput("> Uninstalling VPN, please wait...");
-        await fetch("http://localhost:8000/api/modules/vpn/uninstall?id=" + selectedUser?.uuid);
+        const response = await fetch("http://localhost:8000/api/modules/vpn/uninstall?id=" + selectedUser?.uuid);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            await typeOutput(`> Failed to uninstall VPN: ${errorData.detail || response.statusText}`);
+            return;
+        }
         await typeOutput("> VPN uninstalled.");
     };
 
