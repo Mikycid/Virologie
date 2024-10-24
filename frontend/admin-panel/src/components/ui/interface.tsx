@@ -4,6 +4,7 @@ import {ScrollArea} from "@/components/ui/shadcn/scroll-area.tsx";
 import {User} from "@/Interfaces/User.ts";
 import {KeyloggerButtons} from "@/components/ui/keylogger-buttons.tsx";
 import {VPNButtons} from "@/components/ui/vpn-buttons.tsx";
+import RdpButtons from './rdp-buttons';
 
 export default function Interface({selectedUser}: { selectedUser: User | null }) {
     const [output, setOutput] = useState<string[]>([]);
@@ -45,7 +46,7 @@ export default function Interface({selectedUser}: { selectedUser: User | null })
     const commands = [
         {name: 'Keylogger', command: 'keylogger'},
         {name: 'VPN', command: 'vpn'},
-        {name: 'Launch Virus', command: 'launch_virus'},
+        {name: 'RDP', command: 'rdp'},
         {name: 'Trace IP', command: 'trace_ip'},
         {name: 'Hack Mainframe', command: 'hack_mainframe'},
         {name: 'Delete Logs', command: 'delete_logs'},
@@ -89,6 +90,34 @@ export default function Interface({selectedUser}: { selectedUser: User | null })
             {selectedModule === 'vpn' && (
                     <div className="mt-4">
                         <VPNButtons typeOutput={(text: string) => typeOutput(text)} selectedUser={selectedUser} clearConsole={() => clearConsole()} setOutput={(value: React.SetStateAction<string[]>) => setOutput(value)} />
+                    </div>
+                )
+            }
+            {
+                selectedModule === 'rdp' && (
+                    <div className="mt-4">
+                        <RdpButtons typeOutput={(text: string) => typeOutput(text)} selectedUser={selectedUser} clearConsole={() => clearConsole()} setOutput={(value: React.SetStateAction<string[]>) => setOutput(value)} />
+                    </div>
+                )
+            }
+            {
+                selectedModule === 'trace_ip' && (
+                    <div className="mt-4">
+                        <p>Tracing IP...</p>
+                    </div>
+                )
+            }
+            {
+                selectedModule === 'hack_mainframe' && (
+                    <div className="mt-4">
+                        <p>Hacking mainframe...</p>
+                    </div>
+                )
+            }
+            {
+                selectedModule === 'delete_logs' && (
+                    <div className="mt-4">
+                        <p>Deleting logs...</p>
                     </div>
                 )
             }

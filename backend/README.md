@@ -58,6 +58,8 @@ If the module can uninstall itself or has no disk-writing capabilites alongside 
 
 ## Rule N°4 Line returns
 
-During your coding you'll handle different types of errors like : `unexpected indent (<string>, line 1)` or `invalid syntax (<string>, line 1)`
+During your coding you will maybe face different types of errors like : `unexpected indent (<string>, line 1)` or `invalid syntax (<string>, line 1)`
 
-To handle: change code structure, reduce lists & dictionnaries initalization (I found many error with lists): there is an infinite way to make the same code, find your own through this coding concept, or find the (probably encoding) bug on the infector reverse shell, without breaking the actual running modules !
+My way to handle: change code structure, reduce lists & dictionnaries initalization (I found many error with lists especially): there is an infinite way to make the same code, find your own through this coding concept, or find the (probably encoding) bug on the infector reverse shell, without breaking the actual running modules ! Help yourself from the backend by just retrieving some informations, and treat them from there to avoid those errors.
+
+For now, those errors makes no sense for me, any hints are welcome to find out why those happen and what could be done to fix those, either from module code or root cause.

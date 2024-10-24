@@ -17,13 +17,6 @@ class UserService:
         
         return user_list
     
-    def getKeyloggerLogs(self, user_id):
-        user = self.user_repository.get_user(user_id)
-        if not user:
-             return {"error": "User not found"}
-        return {
-            "logs": user.module_data.get("keylogger")
-        }
     
     async def executePythonShell(self, user_id, command):
         user = self.user_repository.get_user(user_id)

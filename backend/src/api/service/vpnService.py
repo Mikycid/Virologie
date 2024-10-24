@@ -1,8 +1,8 @@
 from fastapi import HTTPException
-from modules.VpnManager import VpnManager
+from modules.VpnModule import VpnModule
 
 class VpnService:
-    def __init__(self, vpnModule: VpnManager):
+    def __init__(self, vpnModule: VpnModule):
         self.vpnModule = vpnModule
 
     async def _handle_result(self, result: str | dict, action: str) -> dict:
@@ -20,9 +20,11 @@ class VpnService:
             dict: The processed result.
         """
         if isinstance(result, str):
-            raise HTTPException(
-                status_code=500, detail=f"Error during {action}: {result}"
-            )
+            if "error" in result or "Exception" in result:
+                raise HTTPException(
+                    status_code=500, detail=f"Error during {action}: {result}"
+                )
+            return {"message": result}
         elif isinstance(result, dict) and "error" in result:
             raise HTTPException(
                 status_code=500, detail=f"Error during {action}: {result['error']}"

