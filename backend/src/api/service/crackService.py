@@ -9,7 +9,10 @@ class CrackService:
         self.user_repository = user_repository
 
     async def retrieve_ntlm(self, id: str):
-        return await self.crackModule.fetch_responder(id)
+        try:
+            return await self.crackModule.fetch_responder(id)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
     
     async def crack(self, id: str, wordlist_content: bytes):
         try:
