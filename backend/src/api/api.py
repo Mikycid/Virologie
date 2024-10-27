@@ -1,7 +1,7 @@
 # api/api.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routes import user_router, vpn_router, keylogger_router, rdp_router
+from api.routes import user_router, vpn_router, keylogger_router, rdp_router, crack_router
 
 def create_app(app_state):
     app = FastAPI()
@@ -21,5 +21,6 @@ def create_app(app_state):
     app.include_router(vpn_router)
     app.include_router(keylogger_router)
     app.include_router(rdp_router)
+    app.include_router(crack_router)
     
     return app

