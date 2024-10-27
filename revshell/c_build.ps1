@@ -27,9 +27,9 @@ $gccParams = @(
 
 gcc $gccParams
 
-gcc downloader.c -o downloader.exe -lwininet `
-    -lshlwapi -mwindows `
-    -I"C:\msys64\mingw64\include" `
-    -L"C:\msys64\mingw64\lib" `
+# gcc downloader.c -o downloader.exe -lwininet `
+#     -lshlwapi -mwindows `
+#     -I"C:\msys64\mingw64\include" `
+#     -L"C:\msys64\mingw64\lib" `
 
 

@@ -1,3 +1,6 @@
+# Main infection vector documentation
+
+- [Main infection vector documentation](#main-infection-vector-documentation)
 - [Overview](#overview)
 - [Compilation prerequisites](#compilation-prerequisites)
 - [Building](#building)
@@ -9,6 +12,7 @@
   - [Rebuild the program](#rebuild-the-program)
 - [Testing](#testing)
   - [Start a listener  :](#start-a-listener--)
+  - [Start a server to serve the necessary dlls on new systems](#start-a-server-to-serve-the-necessary-dlls-on-new-systems)
   - [Execute the built installer.exe](#execute-the-built-installerexe)
 - [Detection](#detection)
   - [Windows Defender](#windows-defender)
@@ -26,19 +30,14 @@ The following workflow outlines how detection is avoided:
 
 1. **Encryption and Payload**  
    - We encrypt a Python reverse shell script (the malicious payload revshell.py) using AES encryption.  
-   - Additionally, a batch script is encrypted (install_python.bat), which downloads a Python embeddable distribution and sets up persistence by creating tasks in the Windows Task Scheduler using `schtasks`.
+   - Additionally, a batch script is encrypted (install_python.bat), which downloads a Python embeddable, sets up pip and install necessary packages for later usage.
 
 2. **Installer Execution**  
    - The encrypted batch code install_python.bat is first decrypted and executed. This is handled by `installer.c`.  
    - Its role is to decrypt the AES-encrypted, hex-encoded reverse shell code and batch script, and then execute them using the `system()` function.  
    - It also decodes the reverse shell program (`revshell.exe`), which is embedded as a hex string in the code, and writes it to the system, placing it next to the downloaded Python DLL. This is the program that will be executed by the windows scheduled task.
 
-3. **Persistence via Task Scheduler**  
-   - The Windows Task Scheduler is used to set up persistence, ensuring that the reverse shell is executed regularly:  
-     - **User mode**: The reverse shell program is executed every minute when the user is infected.  
-     - **Admin mode**: Managed by later-used services, but the reverse shell program should be executed every minute with a system account, as long as it's powered on.
-
-4. **Establishing Control**  
+3. **Establishing Control**  
    - Once the reverse shell is established, remote control is gained over the infected machine, allowing the attacker to execute Python code directly on the system.  
    - The reverse shell sends connections back to the server, enabling orchestration of further processes.
 
@@ -145,6 +144,14 @@ chmod +x ssl_server.sh && ./ssl_server.sh
 
 This will start a ncat tcp server with ssl enabled thanks to the test.key and test.pem
 
+## Start a server to serve the necessary dlls on new systems
+
+Go into the "serve" directory and run this command (if you have python installed), or serve this directory your own way. This will be handled by backend later.
+
+```shell
+python3 -m http.server 8080
+```
+
 ## Execute the built installer.exe
 
 The installer.exe is standalone, with no previous requirements. You can copy it, distribute it across windows 10 and 11 machines. Other executables and script are only used during build time.
@@ -154,7 +161,7 @@ In the listener you should be able to type python code directly into the target 
 For example, try :
 ```python
 print("test")
-test
+test # output of previous command
 import os
 print(os.listdir())
 # Should output the list of the C:\Windows\System32 directory

@@ -14,7 +14,8 @@ class User:
             module_data={},
             connection_time=datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
             first_name="",
-            last_name=""
+            last_name="",
+            username=""
         ):
         self.uuid = uuid
         self.ip = ip
@@ -26,6 +27,7 @@ class User:
         self.module_data = module_data
         self.first_name = first_name
         self.last_name = last_name
+        self.username = username
         self.lock = asyncio.Lock()
         
         
@@ -39,14 +41,18 @@ class User:
             'ip': self.ip,
             'port': self.port,
             'connection_time': self.connection_time,
-            'id_admin': self.is_admin,
+            'is_admin': self.is_admin,
             'first_name': self.first_name,
             'last_name': self.last_name,
-            'module_data': self.module_data
+            'username': self.username,
+            'module_data': self.module_data,
         }
     
     def set_module_data(self, module_name, data):
         self.module_data[module_name] = data
+
+    def get_module_data(self, module_name):
+        return self.module_data.get(module_name, {})
 
     @classmethod
     def from_dict(cls, data):
@@ -58,7 +64,8 @@ class User:
             module_data=data.get('module_data'),
             connection_time = data.get('connection_time'),
             first_name = data.get('first_name'),
-            last_name = data.get('last_name')
+            last_name = data.get('last_name'),
+            username = data.get('username')
         )
         return user
     

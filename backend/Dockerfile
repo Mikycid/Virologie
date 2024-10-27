@@ -4,9 +4,12 @@ ENV TZ=Europe/Paris
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y hashcat
+
 RUN if [ ! -d "/app/venv" ]; then \
         python -m venv venv; \
     fi
+
 
 RUN  . /app/venv/bin/activate
 

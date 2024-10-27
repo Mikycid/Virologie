@@ -13,3 +13,20 @@ services:
       - ./src:/app/src/
       - ./venv:/app/venv
       - ./storage:/storage
+      - ntlms:/responder_logs
+
+  responder:
+    container_name: responder
+    build:
+      context: .
+      dockerfile: Dockerfile.responder
+    environment:
+      - TZ=Europe/Paris
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ntlms:/opt/Responder/logs
+
+volumes:
+  ntlms:
