@@ -11,7 +11,7 @@ class RdpModule:
         user = self.user_repository.get_user(id)
         if not user:
             logging.error(f"User with id {id} not found")
-            return
+            raise Exception("User not found.")
         
         output = await user.execute(payload_path)
         return output

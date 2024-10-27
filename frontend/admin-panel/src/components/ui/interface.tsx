@@ -1,9 +1,9 @@
 import {useState, useRef} from 'react';
-import {Button} from "@/components/ui/shadcn/button.tsx";
-import {ScrollArea} from "@/components/ui/shadcn/scroll-area.tsx";
+import {Button} from "@/Components/ui/shadcn/button";
+import {ScrollArea} from "@/Components/ui/shadcn/scroll-area";
 import {User} from "@/Interfaces/User.ts";
-import {KeyloggerButtons} from "@/components/ui/keylogger-buttons.tsx";
-import {VPNButtons} from "@/components/ui/vpn-buttons.tsx";
+import {KeyloggerButtons} from "@/Components/ui/keylogger-buttons";
+import {VPNButtons} from "@/Components/ui/vpn-buttons";
 import RdpButtons from './rdp-buttons';
 import { CrackingButtons } from './cracking-buttons';
 
