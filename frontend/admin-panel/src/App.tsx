@@ -1,6 +1,6 @@
 'use client'
 
-import { VictimList } from "@/Components/ui/VictimList";
+import { VictimList } from "@/Components/VictimList";
 import { useState } from "react";
 import {User} from "@/Interfaces/User.ts";
 import { Terminal } from "@/Components/Terminal";
