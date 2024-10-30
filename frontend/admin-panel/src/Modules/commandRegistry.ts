@@ -4,6 +4,7 @@ import { User } from '@/Interfaces/User';
 import { crackingModule } from './crackingModule';
 import { keyloggerModule } from './keyloggerModule';
 import { rdpModule } from './rdpModule';
+import { exploitModule } from './exploitModule';
 
 const modules: Record<string, Module> = {};
 
@@ -80,6 +81,7 @@ export const initializeModules = () => {
     registerModule('cracking', crackingModule);
     registerModule('keylogger', keyloggerModule);
     registerModule('rdp', rdpModule);
+    registerModule('exploit', exploitModule);
 };
 
 

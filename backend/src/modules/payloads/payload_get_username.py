@@ -10,7 +10,7 @@ def get_user_full_name_and_username():
         else:
             first_name, last_name = full_name_str, ""
     else:
-        first_name, last_name = "Unknown", "Unknown"
+        first_name, last_name = "Unknown", ""
     
     username = ctypes.create_unicode_buffer(1024)
     if ctypes.windll.advapi32.GetUserNameW(username, ctypes.pointer(ctypes.c_ulong(len(username)))):

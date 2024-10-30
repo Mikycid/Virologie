@@ -9,7 +9,7 @@ def disable_rdp():
 
         subprocess.run(["netsh", "advfirewall", "firewall", "set", "rule", "name=RDP", "new", "enable=no"], check=True)
 
-        print("RDP has been disabled.")
+        print("Success")
     except Exception as e:
         print(f"Failed to disable RDP: {e}")
 
