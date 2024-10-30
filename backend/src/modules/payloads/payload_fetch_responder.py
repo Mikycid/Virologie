@@ -5,6 +5,6 @@ def main():
 
     subprocess.run(["powershell", "-Command", ps_command], capture_output=True, text=True)
 
-    print("Responder fetched")
+    print("Success")
 
 main()

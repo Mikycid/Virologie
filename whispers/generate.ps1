@@ -1,0 +1,1 @@
+py .\syswhispers.py --functions NtProtectVirtualMemory,NtWriteVirtualMemory,NtCreateThreadEx,NtOpenProcess,NtAllocateVirtualMemory,NtFreeVirtualMemory,NtWaitForSingleObject,NtDelayExecution -o needed_func

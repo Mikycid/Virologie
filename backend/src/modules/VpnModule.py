@@ -34,7 +34,7 @@ class VpnModule:
             return
         logging.info(f"Connecting to vpn for user with uuid {uuid}")
         result = await user.execute("./modules/payloads/payload_connect_to_vpn.py", {
-            "OPENVPN_CONFIGURATION_PLACEHOLDER": file_content
+            b"OPENVPN_CONFIGURATION_PLACEHOLDER": file_content
         })
         return result
 
