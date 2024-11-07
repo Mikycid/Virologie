@@ -40,5 +40,6 @@ async def main():
     )
 
 if __name__ == "__main__":
+    uvicorn.run("main:fastapi_app", host=os.getenv('API_HOST'), port=int(os.getenv('API_PORT')), log_level="info", reload=True)
     # Run the asyncio loop with both servers
     asyncio.run(main())
