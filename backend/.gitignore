@@ -2,3 +2,6 @@ storage/
 ./data/
 ./openvpn-data/
 ./openvpn-conf/
+cracked.txt
+rockyou.txt
+test_hash.txt

