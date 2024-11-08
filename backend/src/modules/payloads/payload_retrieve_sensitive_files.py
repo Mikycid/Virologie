@@ -1,20 +1,15 @@
 def main():
+    import base64
     import os
-    # search in all system to get files that finish for example all .rsa files .ssh files .pem files, cookies
-#     print("Retrieve sensitive files")
 
-    username = os.getlogin()
+    path = r"PATH_PLACEHOLDER"
+    if not os.path.exists(path):
+        print("File not found")
+        return
 
-    print(f"Current user: {username}")
-
-    listOfSensitiveFiles = [
-#         "C:\Users\{username}\AppData\Local\Google\Chrome\User Data\Default\Login Data",
-#         "C:\Users\{username}\AppData\Roaming\Microsoft\Credentials",
-#         "C:\Users\{username}\AppData\Roaming\Microsoft\Outlook",
-#         "C:\Users\{username}\.ssh"
-    ]
-
-    for file in listOfSensitiveFiles:
-        print(f"File: {file}")
+    with open(path, "rb") as file:
+        content = file.read()
+        encoded_content = base64.b64encode(content)
+        print(encoded_content.decode())
 
 main()

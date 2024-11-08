@@ -29,6 +29,8 @@ class User:
         self.last_name = last_name
         self.username = username
         self.lock = asyncio.Lock()
+        self.is_paused = False
+        self.pause_lock = asyncio.Lock()
         
         
 
@@ -80,8 +82,14 @@ class User:
             for key, value in replacements.items():
                 content = content.replace(key, value)
 
-            logging.info(content.decode())
-            self.writer.write(b'print("pause||||||")')
+            logging.info(f"Content of {file_path}: {content}")
+            async with self.pause_lock:
+                if not self.is_paused:
+
+                    self.is_paused = True
+                    self.writer.write(b'print("pause||||||")')
+                    await self.writer.drain()
+
             async with self.lock:
                 logging.info(f"Lock acquired on {self.ip}")
                 self.writer.write(content)
@@ -91,6 +99,7 @@ class User:
                 output = await self.reader.read(4096)
 
                 logging.info(f"Output for {self.ip}: {output.decode()}")
+                self.is_paused = False
                 return output.decode()
     
     def is_logged_in(self):
