@@ -10,7 +10,6 @@ def enable_rdp():
         reg.SetValueEx(key, "fDenyTSConnections", 0, reg.REG_DWORD, 0)
         reg.CloseKey(key)
 
-        print("Remote Desktop has been enabled.")
 
         key_path = r"SYSTEM\CurrentControlSet\Control\Terminal Server"
         key = reg.OpenKey(reg.HKEY_LOCAL_MACHINE, key_path, 0, reg.KEY_SET_VALUE)
@@ -28,7 +27,6 @@ def enable_rdp():
         reg.SetValueEx(key, "MaxInstanceCount", 0, reg.REG_DWORD, 999)
         reg.CloseKey(key)
 
-        print("Registry settings for multiple sessions have been configured.")
 
         rule_check = subprocess.run(
             ["netsh", "advfirewall", "firewall", "show", "rule", "name=RDP"],
@@ -37,19 +35,17 @@ def enable_rdp():
         )
 
         if rule_check.returncode != 0 or not re.search(r'\bRDP\b', rule_check.stdout, re.IGNORECASE):
-            print("RDP firewall rule does not exist or is not configured correctly. Creating a new rule...")
             subprocess.run([
                 "netsh", "advfirewall", "firewall", "add", "rule",
                 "name=RDP", "dir=in", "action=allow", "protocol=TCP", "localport=3389"
             ], check=True)
-            print("RDP firewall rule created successfully.")
 
         subprocess.run(["netsh", "advfirewall", "firewall", "set", "rule", "name=RDP", "new", "enable=yes"], check=True)
 
         subprocess.run(["net", "stop", "TermService"], check=True)
         subprocess.run(["net", "start", "TermService"], check=True)
 
-        print("RDP has been configured for multiple concurrent sessions.")
+        print("Success")
     except Exception as e:
         print(f"Failed to enable RDP or configure multiple sessions: {e}")
 

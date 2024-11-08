@@ -8,11 +8,9 @@ def main():
     install_custom_dir = r"C:\Program Files\TAP Driver"
 
     try:
-        # Remove the TAP Driver installation directory
         if os.path.exists(install_dir):
             shutil.rmtree(install_dir)
 
-        # Remove the temporary OpenVPN config directory
         if os.path.exists(temp_ovpn_dir):
             shutil.rmtree(temp_ovpn_dir)
 

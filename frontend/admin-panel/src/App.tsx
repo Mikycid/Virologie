@@ -15,10 +15,7 @@ export default function AdminPanel() {
                     <div className="col-span-1 h-full overflow-auto">
                         <VictimList selectedUser={selectedUser} setSelectedUser={setSelectedUser}/>
                     </div>
-                    {/* <div
-                        className="col-span-2 w-full mx-auto bg-black/50 rounded-lg shadow-lg overflow-hidden border border-green-500">
-                        <Interface selectedUser={selectedUser}/>
-                    </div> */}
+                    
                     <div className="col-span-2 w-full h-full mx-auto">
                         {selectedUser &&
                             <Terminal selectedUser={selectedUser}/>

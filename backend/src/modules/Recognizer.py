@@ -22,3 +22,5 @@ class Recognizer:
             data = await reader.read(4096)
             message = data.decode()
             return ast.literal_eval(message)
+        
+

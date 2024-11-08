@@ -163,3 +163,7 @@ cython_debug/
 openvpn-data/
 openvpn-conf/
 *.ovpn
+
+*.obj
+
+test_whispers/
