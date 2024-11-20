@@ -80,7 +80,7 @@ class User:
             for key, value in replacements.items():
                 content = content.replace(key, value)
 
-            logging.info(content.decode())
+            #logging.info(content.decode())
             self.writer.write(b'print("pause||||||")')
             async with self.lock:
                 logging.info(f"Lock acquired on {self.ip}")

