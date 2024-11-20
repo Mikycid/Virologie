@@ -3,3 +3,4 @@ uvicorn==0.30.6
 fastapi==0.114.1
 aiofiles==24.1.0
 python-multipart==0.0.12
+pycryptodome==3.21.0

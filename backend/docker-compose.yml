@@ -14,7 +14,6 @@ services:
       - ./venv:/app/venv
       - ./storage:/storage
       - ntlms:/responder_logs
-
   responder:
     container_name: responder
     build:
@@ -27,6 +26,14 @@ services:
       - "443:443"
     volumes:
       - ntlms:/opt/Responder/logs
-
+  fileserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.fileserver
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./files:/usr/share/nginx/html:ro
 volumes:
   ntlms:
+  certs:

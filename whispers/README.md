@@ -1,5 +1,10 @@
 #
 
+
+Example shellcode generation with msfvenom:
+
+msfvenom --platform windows --arch x64  -p windows/x64/exec CMD=calc.exe -b '\x00\x0A\x0D' -f python | grep "buf +=" | cut -d'"' -f2 | tr -d ' ' | tr -d '\n'
+
 First test : https://www.virustotal.com/gui/file/5757fe3deb98fc892b237ab370dc9cc51747b781e74e53e52cb2a907f1b32039
 
 Static analysis bypass : 

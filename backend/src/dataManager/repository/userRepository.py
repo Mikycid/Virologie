@@ -8,7 +8,6 @@ load_dotenv()
 
 class UserRepository:
     def __init__(self):
-        # Define the path to the user directory where individual user files will be stored
         self.users_dir = os.path.join(os.getenv('STORAGE_PATH'), 'users')
         self.ensure_data_directory_exists()
         self.users = self.load_users()
@@ -22,7 +21,6 @@ class UserRepository:
         """
         self.ensure_data_directory_exists()
         users = {}
-        # Iterate through all JSON files in the users directory
         for filename in os.listdir(self.users_dir):
             if filename.endswith('.json'):
                 filepath = os.path.join(self.users_dir, filename)
@@ -46,14 +44,11 @@ class UserRepository:
         """Add a new user and save them as an individual JSON file."""
         user_file_path = os.path.join(self.users_dir, f"{user.uuid}.json")
         
-        # Check if the user file exists
         if os.path.exists(user_file_path):
-            # Load existing user data from file
             with open(user_file_path, 'r') as f:
                 existing_data = json.load(f)
                 user.module_data.update(existing_data.get('module_data', {}))  # Update module_data
 
-        # Save the user, regardless of whether they existed or not
         self.users[user.uuid] = user
         self.save_user(user)
 
