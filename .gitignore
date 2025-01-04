@@ -172,3 +172,5 @@ shellcode.hex
 
 .vscode/
 .vs/
+
+stash_backup.patch
