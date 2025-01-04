@@ -10,10 +10,9 @@
   - [Use the b2hex script :](#use-the-b2hex-script-)
   - [Replace the strings with the output of b2hex.py :](#replace-the-strings-with-the-output-of-b2hexpy-)
   - [Rebuild the program](#rebuild-the-program)
-- [Testing](#testing)
-  - [Start a listener  :](#start-a-listener--)
-  - [Start a server to serve the necessary dlls on new systems](#start-a-server-to-serve-the-necessary-dlls-on-new-systems)
+  - [Launch the backend](#launch-the-backend)
   - [Execute the built installer.exe](#execute-the-built-installerexe)
+  - [Control the infected user](#control-the-infected-user)
 - [Detection](#detection)
   - [Windows Defender](#windows-defender)
   - [VirusTotal](#virustotal)
@@ -132,40 +131,25 @@ Paste the hex values accordingly in the "installer.c" program, you should see th
 
 ## Rebuild the program 
 
-Using the c_build.ps1 from a powershell or your own method.
+Using the c_build.ps1 from a powershell.
 
-# Testing
+## Launch the backend
 
-## Start a listener  :
-
-```bash
-chmod +x ssl_server.sh && ./ssl_server.sh
-```
-
-This will start a ncat tcp server with ssl enabled thanks to the test.key and test.pem
-
-## Start a server to serve the necessary dlls on new systems
-
-Go into the "serve" directory and run this command (if you have python installed), or serve this directory your own way. This will be handled by backend later.
-
-```shell
-python3 -m http.server 8080
-```
+Go into the "backend" directory and use `docker compose up` to start the required components.
 
 ## Execute the built installer.exe
 
+If the backend is launched and accessible at hackstation.virology.fr, the computer will be infected and we can now control the user's PC with the frontend
+
 The installer.exe is standalone, with no previous requirements. You can copy it, distribute it across windows 10 and 11 machines. Other executables and script are only used during build time.
 
-In the listener you should be able to type python code directly into the target machine.
+## Control the infected user
 
-For example, try :
-```python
-print("test")
-test # output of previous command
-import os
-print(os.listdir())
-# Should output the list of the C:\Windows\System32 directory
-```
+Go into the "frontend" directory and launch the frontend with `docker compose up`
+
+You should be able to use the control interface at http://localhost:3000
+
+
 
 # Detection
 

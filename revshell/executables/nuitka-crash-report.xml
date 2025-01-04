@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='utf8'?>
+<nuitka-compilation-report nuitka_version="2.5.4" nuitka_commercial_version="not installed" completion="exception">
+  <exception exception_type="PermissionError" exception_value="[WinError 32] Le processus ne peut pas accéder au fichier car ce fichier est utilisé par un autre processus: 'revshell.build\\module.pynput.c'">
+Traceback (most recent call last):
+  File "C:\Users\lepav\OneDrive\nfs\Virologie\revshell\executables\venv\Lib\site-packages\nuitka\MainControl.py", line 1160, in main
+    _main()
+  File "C:\Users\lepav\OneDrive\nfs\Virologie\revshell\executables\venv\Lib\site-packages\nuitka\MainControl.py", line 999, in _main
+    main_module = _createMainModule()
+                  ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\lepav\OneDrive\nfs\Virologie\revshell\executables\venv\Lib\site-packages\nuitka\MainControl.py", line 173, in _createMainModule
+    cleanSconsDirectory(source_dir)
+  File "C:\Users\lepav\OneDrive\nfs\Virologie\revshell\executables\venv\Lib\site-packages\nuitka\build\SconsInterface.py", line 446, in cleanSconsDirectory
+    check(path)
+  File "C:\Users\lepav\OneDrive\nfs\Virologie\revshell\executables\venv\Lib\site-packages\nuitka\build\SconsInterface.py", line 442, in check
+    deleteFile(path, must_exist=True)
+  File "C:\Users\lepav\OneDrive\nfs\Virologie\revshell\executables\venv\Lib\site-packages\nuitka\utils\FileOperations.py", line 653, in deleteFile
+    os.unlink(path)
+PermissionError: [WinError 32] Le processus ne peut pas accéder au fichier car ce fichier est utilisé par un autre processus: 'revshell.build\\module.pynput.c'
+</exception>
+  <performance>
+    <memory_usage name="after_launch" value="43962368" />
+  </performance>
+  <data_composer blob_size="None" />
+  <command_line>
+    <option value="--msvc=14.3" />
+    <option value="--onefile" />
+    <option value="--include-package=ctypes" />
+    <option value="--include-package=pyautogui" />
+    <option value="--include-package=numpy" />
+    <option value="--include-package=requests" />
+    <option value="--include-package=pynput" />
+    <option value="--enable-plugin=numpy" />
+    <option value="--enable-plugin=tk-inter" />
+    <option value="--include-package-data=pyautogui" />
+    <option value="revshell.py" />
+  </command_line>
+  <plugins>
+    <plugin name="anti-bloat" user_enabled="no" />
+    <plugin name="data-files" user_enabled="no" />
+    <plugin name="delvewheel" user_enabled="no" />
+    <plugin name="dll-files" user_enabled="no" />
+    <plugin name="eventlet" user_enabled="no" />
+    <plugin name="gevent" user_enabled="no" />
+    <plugin name="gi" user_enabled="no" />
+    <plugin name="glfw" user_enabled="no" />
+    <plugin name="implicit-imports" user_enabled="no" />
+    <plugin name="kivy" user_enabled="no" />
+    <plugin name="matplotlib" user_enabled="no" />
+    <plugin name="multiprocessing" user_enabled="no" />
+    <plugin name="options-nanny" user_enabled="no" />
+    <plugin name="pbr-compat" user_enabled="no" />
+    <plugin name="pkg-resources" user_enabled="no" />
+    <plugin name="playwright" user_enabled="no" />
+    <plugin name="pywebview" user_enabled="no" />
+    <plugin name="spacy" user_enabled="no" />
+    <plugin name="tk-inter" user_enabled="yes" />
+    <plugin name="transformers" user_enabled="no" />
+  </plugins>
+  <distributions />
+  <python python_exe="${sys.prefix}\Scripts\python.exe" python_flavor="Unknown" python_version="3.12.7" os_name="Windows" os_release="11" arch_name="x86_64" filesystem_encoding="utf-8">
+    <search_path>
+      <path value="${cwd}" />
+      <path value="${sys.real_prefix}\DLLs" />
+      <path value="${sys.real_prefix}\Lib" />
+      <path value="${sys.real_prefix}" />
+      <path value="${sys.prefix}" />
+      <path value="${sys.prefix}\Lib\site-packages" />
+      <path value="${sys.prefix}\Lib\site-packages\setuptools\_vendor" />
+    </search_path>
+  </python>
+  <output run_filename="${cwd}\revshell.exe" />
+</nuitka-compilation-report>

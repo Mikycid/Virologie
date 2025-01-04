@@ -167,3 +167,8 @@ openvpn-conf/
 *.obj
 
 test_whispers/
+
+shellcode.hex
+
+.vscode/
+.vs/

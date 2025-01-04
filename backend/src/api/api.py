@@ -23,5 +23,6 @@ def create_app(app_state):
     app.include_router(rdp_router)
     app.include_router(crack_router)
     app.include_router(exploit_router)
+    app.include_router(system_router)
     
     return app

