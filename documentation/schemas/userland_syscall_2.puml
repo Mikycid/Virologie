@@ -1,0 +1,46 @@
+@startuml
+actor Developer as Dev
+actor Hacker
+actor "Infecté" as Infected
+entity "Shellcode Loader" as Loader
+entity "Sw3 Syscall Resolver" as SysWhispers3
+
+== Pré-compilation: Génération des stubs SysWhispers3 ==
+Dev -> SysWhispers3: Fournit la liste des appels système nécessaires
+SysWhispers3 -> Dev: Génère les stubs syscall (assembly)
+note right: Les stubs sont ajoutés au programme \nau moment de la compilation pour \nréaliser des appels directs.
+
+== Initialisation (À l'exécution) ==
+Hacker -> Infected: Déploie le programme infecté
+Hacker -> Infected: Transmet le fichier AES chiffré
+Hacker -> Infected: Transmet la clé AES et IV
+
+== Décryptage du Shellcode ==
+Infected -> Loader: Charge la bibliothèque OpenSSL
+Loader -> Loader: Convertit HEX en binaire (clé et IV)
+Loader -> Loader: Déchiffre le shellcode avec AES-256-CBC
+Loader -> Loader: Alloue une région mémoire avec `Sw3NtAllocateVirtualMemory`
+
+== Résolution des appels système ==
+Loader -> SysWhispers3: Utilise les stubs pré-compilés pour effectuer des syscalls
+note right: Les stubs contournent `ntdll.dll` \npour effectuer des appels système directs.
+
+== Injection du Shellcode ==
+alt Local Execution
+    Loader -> Sw3NtWriteVirtualMemory: Écrit le shellcode dans la mémoire locale
+    Loader -> Sw3NtProtectVirtualMemory: Change les permissions en `PAGE_EXECUTE_READ`
+    Loader -> Sw3NtQueueApcThread: Ajoute une APC pour exécuter le shellcode
+else Remote Injection
+    Loader -> Sw3NtOpenProcess: Ouvre un processus cible
+    Loader -> Sw3NtAllocateVirtualMemory: Alloue de la mémoire dans le processus cible
+    Loader -> Sw3NtWriteVirtualMemory: Écrit le shellcode dans le processus cible
+    Loader -> Sw3NtProtectVirtualMemory: Change les permissions mémoire dans le processus cible
+    Loader -> Sw3NtCreateThreadEx: Crée un thread dans le processus cible
+end
+
+== Nettoyage ==
+Loader -> Infected: Efface la mémoire sensible
+Loader -> Infected: Libère les ressources allouées avec Sw3NtFreeVirtualMemory
+Loader -> Loader: Supprime les clés et buffers temporaires
+
+@enduml

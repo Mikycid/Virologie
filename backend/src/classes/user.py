@@ -45,15 +45,15 @@ class User:
         
     async def watch_processes(self):
         while True:
-            processes = await self.execute("./modules/payloads/payload_list_processes.py", final_character=b"}]")
-            self.processes = ast.literal_eval(processes)
+            # processes = await self.execute("./modules/payloads/payload_list_processes.py", final_character=b"}]")
+            # self.processes = ast.literal_eval(processes)
             await asyncio.sleep(5)
 
     async def watch_agents(self):
         while True:
-            while len(self.agents) < self.min_agents:
-                await self.agent_module.launch_agent(self.uuid)
-                await asyncio.sleep(5)
+            # while len(self.agents) < self.min_agents:
+            #     await self.agent_module.launch_agent(self.uuid)
+            #     await asyncio.sleep(5)
             await asyncio.sleep(5)
 
     def watch_processes_if_not_running(self):

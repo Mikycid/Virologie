@@ -30,7 +30,7 @@ xor_key = "0ltbh2lthb4"
 encoded_python_path = xor_encode(python_path, xor_key)
 encoded_wrapper_template = xor_encode(wrapper_template, xor_key)
 encoded_cmdline = xor_encode(cmdline, xor_key)
-encoded_get_uuid = xor_encode("import os;print(os.popen('wmic csproduct get uuid').read().strip().splitlines()[-1])", xor_key)
+encoded_get_uuid = xor_encode("import os;print(os.popen('powershell -Command \"Get-CimInstance -Class Win32_ComputerSystemProduct | Select-Object -ExpandProperty UUID\"').read().strip().splitlines()[-1])", xor_key)
 
 # Format output for C code
 print("Encoded Python Path:")

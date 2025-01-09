@@ -152,7 +152,7 @@ export const Terminal: React.FC<TerminalProps> = ({ selectedUser, setModules }) 
   };
 
   return (
-    <div className="h-full flex flex-col space-y-2">
+    <div className="h-full max-h-full flex flex-col space-y-2">
       <GraphicalActions selectedUser={selectedUser} addOutput={addOutput} setModules={setModules}  />
       <div className="flex flex-col bg-gray-900 text-white p-4 rounded-lg space-y-2 flex-grow overflow-hidden h-1/2 max-h-1/2">
         <div ref={outputRef} className="output h-full overflow-y-auto flex-grow">

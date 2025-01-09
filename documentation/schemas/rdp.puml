@@ -1,0 +1,48 @@
+@startuml
+
+start
+
+:Le Pirate exécute le script
+enable_rdp();
+
+:Modifie fDenyTSConnections à 0;
+note right
+Désactive la restriction qui bloque les connexions RDP
+end note
+
+:Modifie fSingleSessionPerUser à 0;
+note right
+Permet plusieurs sessions RDP simultanées par utilisateur
+end note
+
+:Crée ou met à jour les clés dans
+SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services;
+note right
+Active les connexions multiples,
+configure le nombre max de sessions (999),
+met à jour les politiques pour RDP
+end note
+
+:Vérifie si la règle "RDP" existe;
+if (Règle inexistante ?) then (Oui)
+  :Ajoute une règle pour autoriser le port 3389;
+  note right
+  Permet le trafic TCP entrant sur le port utilisé par RDP
+  end note
+else (Non)
+  :Active la règle "RDP";
+  note right
+  S'assure que la règle existante est activée
+  end note
+endif
+
+:Redémarre le service Terminal Server;
+note right
+Applique les modifications du registre au service RDP
+end note
+
+:Retourne "Success" ou une erreur;
+
+stop
+
+@enduml

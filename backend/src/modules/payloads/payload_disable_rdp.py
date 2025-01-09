@@ -7,7 +7,7 @@ def disable_rdp():
         reg.SetValueEx(key, "fDenyTSConnections", 0, reg.REG_DWORD, 1)
         reg.CloseKey(key)
 
-        subprocess.run(["netsh", "advfirewall", "firewall", "set", "rule", "name=RDP", "new", "enable=no"], check=True)
+        subprocess.run(["netsh", "advfirewall", "firewall", "set", "rule", "name=RDP", "new", "enable=no"], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
 
         print("Success")
     except Exception as e:

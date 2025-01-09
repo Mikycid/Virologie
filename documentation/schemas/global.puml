@@ -1,0 +1,20 @@
+@startuml
+actor "Infected User" as U
+
+participant "Installer (C Program)" as Installer
+participant "Backdoor Executable (C Program)" as Backdoor
+participant "Backend Server" as Backend
+
+U -> Installer: Run Installer
+Installer -> Installer: Download Python Standalone
+Installer -> Installer: Install Python Standalone Locally
+Installer -> Installer: Download Backdoor Executable
+Installer -> Installer: Save Files to Hidden Directory
+Installer -> Backdoor: Launch Backdoor Executable
+
+Backdoor -> Backend: Connect to Backend Server
+Backend --> Backdoor: Send authentication python code 
+Backdoor -> Backend: Execute and Send (Computer's ID)
+Backend --> Backdoor: Send Python Commands
+Backdoor -> Backend: Execute Python Code And Send Output
+@enduml

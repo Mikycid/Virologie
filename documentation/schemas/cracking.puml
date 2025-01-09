@@ -1,0 +1,21 @@
+@startuml
+actor Hacker
+actor Infecté
+participant Responder
+participant Volume
+participant "Serveur Backend" as Backend
+
+group Récupération de NTLM
+    Hacker -> Infecté : Déclenche "Récupérer NTLM"
+    Infecté -> Responder : Envoie une requête d'authentification par challenge
+    Responder -> Responder : Analyse NTLM
+    Responder -> Volume : Stocke le hash
+end
+
+group Craquage de mot de passe
+    Hacker -> Backend : Déclenche "Craquer le mot de passe" avec une wordlist
+    Backend -> Volume : Accède au hash
+    Backend -> Backend : Lance hashcat pour craquer le mot de passe
+    Backend -> Hacker : Retourne le mot de passe en clair
+end
+@enduml

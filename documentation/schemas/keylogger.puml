@@ -1,0 +1,21 @@
+@startuml
+actor Utilisateur
+actor Pirate
+rectangle Keylogger {
+    usecase "Capture les frappes\net les ajouter au tampon" as UC1
+    usecase "Envoie le tampon\nau serveur" as UC2
+    usecase "Vide le tampon" as UC3
+}
+rectangle Serveur {
+    usecase "Stocker les frappes reçues" as UC4
+    usecase "Permet la consultation\ndes frappes par le pirate" as UC5
+}
+
+Utilisateur --> UC1
+UC1 --> UC2 : Toutes les X secondes
+UC2 --> UC3
+UC2 --> UC4
+Pirate --> UC5
+UC5 --> UC4
+
+@enduml

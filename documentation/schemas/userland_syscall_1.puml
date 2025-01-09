@@ -1,0 +1,15 @@
+@startuml
+actor Hacker
+actor "Infecté" as Infected
+entity "Serveur Backend" as Backend
+entity "Shellcode Loader" as Loader
+
+Hacker -> Backend: Upload du shellcode en clair
+Backend -> Backend: Chiffrement du shellcode
+Backend -> Infected: Envoi du loader
+Backend -> Infected: Envoi du shellcode chiffré
+Backend -> Infected: Demande d'exécution du loader
+Infected -> Loader: Exécution du loader
+Loader -> Infected: Déchiffrement et exécution du shellcode
+
+@enduml

