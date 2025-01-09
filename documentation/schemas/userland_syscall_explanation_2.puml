@@ -1,0 +1,29 @@
+@startuml
+
+skinparam backgroundColor #FFFFFF
+skinparam monochrome true
+skinparam shadowing false
+
+Title Interaction Système : Processus Normal vs Userland Syscall
+
+' Définir les acteurs et les couches du système
+actor "Utilisateur" as user
+rectangle "Couche Applicative" as appLayer {
+    rectangle "Processus Standard" as stdProcess
+    rectangle "Userland Syscall" as syscallProcess
+}
+rectangle "Couche Pilote" as driverLayer
+rectangle "Couche Kernel" as kernelLayer
+
+' Flux du processus standard
+user --> stdProcess : Interagit avec
+stdProcess --> driverLayer : Utilise les APIs des pilotes
+stdProcess --> kernelLayer : Dépend des pilotes pour l'accès
+
+driverLayer --> kernelLayer : Communique en interne
+
+' Flux du userland syscall
+user --> syscallProcess : Interagit avec
+syscallProcess --> kernelLayer : Appel système direct <<userland syscall>>
+
+@enduml

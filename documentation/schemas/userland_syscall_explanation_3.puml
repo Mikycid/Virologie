@@ -1,0 +1,24 @@
+@startuml
+
+skinparam backgroundColor #FFFFFF
+skinparam monochrome true
+skinparam shadowing false
+
+Title ntdll et implications des AV/EDR
+
+actor "Utilisateur" as user
+rectangle "Application" as app
+rectangle "ntdll.dll" as ntdll
+rectangle "Kernel" as kernel
+rectangle "Solution AV/EDR" as avedr
+
+' Standard process flow
+user --> app : Interagit avec
+app --> ntdll : Appel aux fonctions
+ntdll --> kernel : Appels systèmes
+
+' AV/EDR hooking flow
+avedr --> ntdll : Surveille et hooke les fonctions
+ntdll --> avedr : Rapporte les appels hookés
+
+@enduml

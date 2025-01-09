@@ -1,0 +1,39 @@
+@startuml
+
+title Processus d'un syscall : Espace utilisateur vers Espace Kernel
+
+skinparam monochrome true
+skinparam arrowThickness 2
+
+participant "Application utilisateur" as UserApp
+participant "Interface Syscall" as SyscallInterface
+participant "Gestionnaire Syscall" as SyscallHandler
+participant "Fonction Kernel" as KernelFunction
+participant "Matériel" as Hardware
+
+UserApp -> SyscallInterface : Appel à une fonction système
+SyscallInterface -> SyscallHandler : Transfert via un interrupt
+SyscallHandler -> KernelFunction : Appelle la fonction appropriée
+KernelFunction -> Hardware : Interaction avec le matériel
+Hardware --> KernelFunction : Retourne le résultat
+KernelFunction --> SyscallHandler : Passe le résultat
+SyscallHandler --> SyscallInterface : Retourne à l'interface
+SyscallInterface --> UserApp : Résultat ou erreur
+
+note right of UserApp
+  1. L'application demande un service (ex: lecture d'un fichier).
+end note
+
+note right of SyscallInterface
+  2. Transfert sécurisé à l'espace Kernel via une interruption.
+end note
+
+note right of SyscallHandler
+  3. Le gestionnaire trouve la fonction adéquate.
+end note
+
+note right of KernelFunction
+  4. La fonction interagit avec le matériel ou les ressources.
+end note
+
+@enduml
