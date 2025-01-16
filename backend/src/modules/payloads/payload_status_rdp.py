@@ -32,7 +32,7 @@ def is_rdp_enabled():
         rule_check = subprocess.run(
             ["netsh", "advfirewall", "firewall", "show", "rule", "name=RDP"],
             capture_output=True,
-            text=True, startupinfo=si
+            text=True, startupinfo=si, creationflags=subprocess.CREATE_NO_WINDOW
         )
 
         if rule_check.returncode == 0 and re.search(r'\bEnabled:\s*Yes\b', rule_check.stdout, re.IGNORECASE):

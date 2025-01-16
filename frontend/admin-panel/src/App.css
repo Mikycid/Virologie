@@ -1,42 +1,31 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* General gutter styling with gradient */
+.gutter {
+  transition: background-color 0.5s ease, transform 0.5s ease;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Hover effect for reversing gradient */
+.gutter:hover {
+  transform: scale(1.05);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Horizontal gutter for resizing columns */
+.gutter-horizontal {
+  background: linear-gradient(to right, #2a2a2d, #8a2be2, #2a2a2d);
+  cursor: col-resize;
+  width: 5px !important;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.gutter-horizontal:hover {
+  background: linear-gradient(to left, #2a2a2d, #00ff9d, #2a2a2d);
 }
 
-.card {
-  padding: 2em;
+/* Vertical gutter for resizing rows */
+.gutter-vertical {
+  background: linear-gradient(to bottom, #2a2a2d, #8a2be2, #2a2a2d);
+  cursor: row-resize;
+  height: 5px !important;
 }
 
-.read-the-docs {
-  color: #888;
+.gutter-vertical:hover {
+  background: linear-gradient(to top, #2a2a2d, #00ff9d, #2a2a2d);
 }

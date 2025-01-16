@@ -43,7 +43,7 @@ export const GraphicalActions: React.FC<GraphicalActionsProps> = ({
     <div className="h-full bg-gray-800 rounded-lg p-2 flex flex-col overflow-hidden">
       <h3 className="text-lg font-semibold text-white mb-2">Select a module</h3>
       <div className="flex-grow overflow-y-auto">
-        <div className="modules-grid grid grid-cols-2 gap-2 mb-2">
+        <div className="modules-grid grid grid-cols-2 gap-2 mb-2" id="module-frame">
           {Object.keys(localModules).map((moduleName) => (
             <button
               key={moduleName}

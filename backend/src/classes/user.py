@@ -14,30 +14,49 @@ class User:
             writer: asyncio.StreamWriter|None=None, 
             is_admin=False, 
             module_data={},
-            connection_time=datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
+            connection_time=[],
             first_name="",
             last_name="",
             username="",
-            agent_module=None
+            agent_module=None,
+            is_domain_admin=False,
+            domain_name="",
+            machine_name="",
+            country="",
+            region="",
+            city="",
+            latitude=0,
+            longitude=0
         ):
         self.uuid = uuid
         self.ip = ip
         self.port = port
         self.connection_time = connection_time
-        self.reader: asyncio.StreamReader|None = reader
-        self.writer: asyncio.StreamWriter|None = writer
-        self.agents = []
         self.is_admin = is_admin
         self.module_data = module_data
         self.first_name = first_name
         self.last_name = last_name
         self.username = username
+        self.is_domain_admin = is_domain_admin
+        self.domain_name = domain_name
+        self.machine_name = machine_name
+        self.longitude = longitude
+        self.latitude = latitude
+        self.city = city
+        self.region = region
+        self.country = country
+
+
+        self.reader: asyncio.StreamReader|None = reader
+        self.writer: asyncio.StreamWriter|None = writer
+        self.agents = []
         self.lock = asyncio.Lock()
         self.min_agents = 3
         self.processes = []
         self.watch_processes_task = None
         self.watch_agents_task = None
         self.agent_module = agent_module
+
         if self.is_logged_in():
             self.watch_processes_task = asyncio.create_task(self.watch_processes())
             self.watch_agents_task = asyncio.create_task(self.watch_agents())
@@ -82,6 +101,14 @@ class User:
             'last_name': self.last_name,
             'username': self.username,
             'module_data': self.module_data,
+            'domain_name': self.domain_name,
+            'is_domain_admin': self.is_domain_admin,
+            'machine_name': self.machine_name,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
+            'city': self.city,
+            'region': self.region,
+            'country': self.country
         }
     
     def set_module_data(self, module_name, data):
@@ -101,7 +128,15 @@ class User:
             connection_time = data.get('connection_time'),
             first_name = data.get('first_name'),
             last_name = data.get('last_name'),
-            username = data.get('username')
+            username = data.get('username'),
+            is_domain_admin = data.get('is_domain_admin'),
+            domain_name = data.get('domain_name'),
+            machine_name = data.get('machine_name'),
+            latitude = data.get('latitude'),
+            longitude = data.get('longitude'),
+            city = data.get('city'),
+            region = data.get('region'),
+            country = data.get('country')
         )
         return user
     
@@ -132,7 +167,7 @@ class User:
                         return
 
                     output = b""
-                    while not output.endswith(final_character):
+                    while not output.endswith(final_character) or not output:
                         chunk = await self.reader.read(4096)
                         output += chunk
                         if not final_character:
@@ -143,7 +178,7 @@ class User:
                     return decoded_output
     
     def is_logged_in(self):
-        return self.reader is not None and self.writer is not None
+        return self.reader is not None and self.writer is not None and not self.reader.at_eof()
     
     async def send(self, message):
         if self.is_logged_in():

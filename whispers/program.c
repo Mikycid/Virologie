@@ -189,6 +189,7 @@ void InjectShellcode(DWORD pid, unsigned char* shellcode, size_t shellcode_len) 
     CloseHandle(hProcess);
 
 }
+
 EXTERN_C NTSTATUS Sw3NtQueueApcThread(
     IN HANDLE ThreadHandle,
     IN PKNORMAL_ROUTINE ApcRoutine,

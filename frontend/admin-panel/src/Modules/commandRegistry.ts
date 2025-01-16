@@ -6,6 +6,8 @@ import { keyloggerModule } from './keyloggerModule';
 import { rdpModule } from './rdpModule';
 import { exploitModule } from './exploitModule';
 import { systemModule } from './systemModule';
+import { trollModule } from './trollModule';
+import { adModule } from './adModule';
 
 const modules: Record<string, Module> = {};
 
@@ -161,6 +163,8 @@ export const initializeModules = () => {
     registerModule('rdp', rdpModule);
     registerModule('exploit', exploitModule);
     registerModule('system', systemModule);
+    registerModule('troll', trollModule);
+    registerModule('ad', adModule);
 };
 
 
