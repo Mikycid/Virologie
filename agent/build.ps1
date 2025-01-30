@@ -1,0 +1,1 @@
+gcc -o agent.exe agent.c -IC:\msys64\mingw64\include -LC:\msys64\mingw64\lib -DSECURITY_WIN32 -funroll-loops -O3 -lws2_32 -lsecur32 -lcrypt32 -lpython311 -fvisibility=hidden

@@ -23,5 +23,4 @@ class CrackService:
     async def old_passwords(self, id: str):
         user = self.user_repository.get_user(id)
         module_data = user.get_module_data("cracker")
-        logging.info(f"Module data: {module_data.get("old_ntlms", [])}")
         return module_data.get("old_ntlms", [])

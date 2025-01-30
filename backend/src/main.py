@@ -29,6 +29,7 @@ async def start_socket_server():
     await socket_server.start()
 
 async def main():
+    data_manager.start()
     await asyncio.gather(
         start_socket_server(),
         start_fastapi()

