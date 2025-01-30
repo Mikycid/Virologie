@@ -14,7 +14,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { Card } from '@/components/ui/card';
+import { Card } from '@/Components/ui/Card';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
