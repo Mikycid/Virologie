@@ -120,7 +120,6 @@ class AgentModule:
             result = await user.execute("./modules/payloads/exploit/payload_exec_shellcode.py", {
                 b"TO_REPLACE_WITH_METHOD": accessible_process,
             }, wait_output=False)
-            logging.info("Agent launched")
             return {"message": result}
         
         logging.error("No accessible process found")

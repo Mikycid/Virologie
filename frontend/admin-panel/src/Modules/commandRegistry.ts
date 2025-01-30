@@ -8,6 +8,7 @@ import { exploitModule } from './exploitModule';
 import { systemModule } from './systemModule';
 import { trollModule } from './trollModule';
 import { adModule } from './adModule';
+import {sensitiveFilesModule} from "./sensitiveFilesModule.ts";
 
 const modules: Record<string, Module> = {};
 
@@ -165,6 +166,7 @@ export const initializeModules = () => {
     registerModule('system', systemModule);
     registerModule('troll', trollModule);
     registerModule('ad', adModule);
+    registerModule('sensitiveFiles', sensitiveFilesModule);
 };
 
 

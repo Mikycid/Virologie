@@ -8,3 +8,4 @@ from .exploitRoutes import router as exploit_router
 from .systemRoutes import router as system_router
 from .trollRoutes import router as troll_router
 from .adRoutes import router as ad_router
+from .sensitiveFilesRoute import sensitive_files_router

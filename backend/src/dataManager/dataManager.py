@@ -10,7 +10,9 @@ from modules.AgentModule import AgentModule
 from modules.Recognizer import Recognizer
 from modules.SystemModule import SystemModule
 from modules.ADModule import ADModule
+from modules.SensitiveFilesModule import SensitiveFilesModule
 from dotenv import load_dotenv
+
 load_dotenv()
 
 class DataManager:
@@ -25,6 +27,7 @@ class DataManager:
         self.recognizer_module = Recognizer(self.user_repository)
         self.system_module = SystemModule(self.user_repository)
         self.ad_module = ADModule(self.user_repository)
+        self.sensitive_files_module = SensitiveFilesModule(self.user_repository)
         self.lock = asyncio.Lock()
 
     def start(self):

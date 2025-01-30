@@ -13,7 +13,6 @@ class VpnModule:
         if not user:
             logging.error(f"User with uuid {uuid} not found")
             return
-        logging.info(f"Installing vpn for user with uuid {uuid}")
         result = await user.execute("./modules/payloads/payload_install_vpn.py")
         return result
     
@@ -22,7 +21,6 @@ class VpnModule:
         if not user:
             logging.error(f"User with uuid {uuid} not found")
             return
-        logging.info(f"Installing vpn for user with uuid {uuid}")
         result = await user.execute("./modules/payloads/payload_uninstall_vpn.py")
         return result
 
@@ -32,7 +30,6 @@ class VpnModule:
         if not user:
             logging.error(f"User with uuid {uuid} not found")
             return
-        logging.info(f"Connecting to vpn for user with uuid {uuid}")
         result = await user.execute("./modules/payloads/payload_connect_to_vpn.py", {
             b"OPENVPN_CONFIGURATION_PLACEHOLDER": file_content
         })
@@ -49,7 +46,6 @@ class VpnModule:
         if isinstance(response, dict):
             return response
         try:
-            logging.info("response: " + str(response))
             config_output, state_output = response.split("|||")
             config_output = ast.literal_eval(config_output)
             state_output = ast.literal_eval(state_output)

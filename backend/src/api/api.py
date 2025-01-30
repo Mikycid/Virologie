@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes import *
 
+
 def create_app(app_state):
     app = FastAPI()
     app.state.app_state = app_state
@@ -26,5 +27,6 @@ def create_app(app_state):
     app.include_router(system_router)
     app.include_router(troll_router)
     app.include_router(ad_router)
+    app.include_router(sensitive_files_router)
     
     return app

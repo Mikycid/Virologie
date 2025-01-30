@@ -12,7 +12,6 @@ class TrollService:
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         await user.execute("./modules/payloads/payload_troll.py")
-        logging.info("executed")
         return {
             "success": "Piano-mode started"
         }
