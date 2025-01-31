@@ -25,7 +25,7 @@ async def start_fastapi():
     await server.serve()
 
 async def start_socket_server():
-    socket_server = SocketServer(app_state, os.getenv('SOCKET_HOST'), int(os.getenv('SOCKET_PORT')))
+    socket_server = SocketServer(app_state, os.getenv('SOCKET_HOST'), int(os.getenv('SOCKET_PORT')), os.getenv('LOCAL_ADDR'))
     await socket_server.start()
 
 async def main():

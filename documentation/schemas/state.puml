@@ -1,0 +1,18 @@
+@startuml
+state "Inactive (Not Running)" as Inactive
+state "Running" as Running
+state "Connected to Backend" as Connected
+state "Disconnected (Retrying)" as Disconnected
+
+[*] --> Inactive
+
+Inactive --> Running : Installed & Executed
+Running --> Connected : Connects to Backend
+Connected --> Running : Backend Disconnects
+Connected --> Disconnected : Network Issue
+Disconnected --> Inactive : Too Many Failures (Give up)
+Disconnected --> Connected : Reconnection Successful
+Running --> Inactive : System Reboot
+Inactive --> Running : Auto-restart on Boot
+
+[*] --> Running : Persistence Mechanism

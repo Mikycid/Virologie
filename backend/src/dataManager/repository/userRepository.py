@@ -56,6 +56,11 @@ class UserRepository:
         """Retrieve a user by UUID."""
         return self.users.get(uuid)
     
+    def switch_user(self, uuid, new_user: User):
+        """Replace a user with a new one."""
+        self.users[uuid] = new_user
+        self.save_user(new_user)
+    
     def get_user_list(self):
         """Retrieve all users with an additional 'logged' key indicating login status."""
         return [{**x.to_dict(), "logged": x.is_logged_in()} for x in self.users.values()]

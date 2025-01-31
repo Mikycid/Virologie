@@ -34,5 +34,7 @@ class ADModule:
     
     async def propagate(self, id):
         user = self.user_repository.get_user(id)
+        await user.execute("./modules/payloads/ad/payload_ad_enable_smb.py")
         ad_propagate = await user.execute("./modules/payloads/ad/payload_ad_propagate.py")
+        logging.info(ad_propagate)
         return ad_propagate

@@ -1,8 +1,7 @@
-from datetime import datetime
 import logging
 import asyncio
-import ast
 import os
+from typing import List
 
 class User:
     def __init__(
@@ -56,11 +55,36 @@ class User:
         self.watch_processes_task = None
         self.watch_agents_task = None
         self.agent_module = agent_module
+        self.standby_sessions: List[User] = []
+        self.route_lock = None
 
         if self.is_logged_in():
             self.watch_processes_task = asyncio.create_task(self.watch_processes())
             self.watch_agents_task = asyncio.create_task(self.watch_agents())
         
+    def copy(self):
+        return User(
+            uuid=self.uuid,
+            ip=self.ip,
+            port=self.port,
+            is_admin=self.is_admin,
+            module_data=self.module_data,
+            connection_time=self.connection_time,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            username=self.username,
+            agent_module=self.agent_module,
+            is_domain_admin=self.is_domain_admin,
+            domain_name=self.domain_name,
+            machine_name=self.machine_name,
+            longitude=self.longitude,
+            latitude=self.latitude,
+            city=self.city,
+            region=self.region,
+            country=self.country,
+            reader=self.reader,
+            writer=self.writer
+        )
         
     async def watch_processes(self):
         while True:

@@ -11,6 +11,7 @@ from modules.Recognizer import Recognizer
 from modules.SystemModule import SystemModule
 from modules.ADModule import ADModule
 from modules.SensitiveFilesModule import SensitiveFilesModule
+from modules.DNSModule import DNSModule
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -28,6 +29,7 @@ class DataManager:
         self.system_module = SystemModule(self.user_repository)
         self.ad_module = ADModule(self.user_repository)
         self.sensitive_files_module = SensitiveFilesModule(self.user_repository)
+        self.dns_module = DNSModule(self.user_repository)
         self.lock = asyncio.Lock()
 
     def start(self):

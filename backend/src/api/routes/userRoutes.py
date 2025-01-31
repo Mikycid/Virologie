@@ -13,6 +13,7 @@ def getUserService(request: Request) -> UserService:
 async def getAllUsers(user_service: UserService = Depends(getUserService)):
     return user_service.getUsers()
 
+
 class CommandRequest(BaseModel):
     command: str
     id: str

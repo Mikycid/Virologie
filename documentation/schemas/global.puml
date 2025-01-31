@@ -13,8 +13,12 @@ Installer -> Installer: Save Files to Hidden Directory
 Installer -> Backdoor: Launch Backdoor Executable
 
 Backdoor -> Backend: Connect to Backend Server
-Backend --> Backdoor: Send authentication python code 
-Backdoor -> Backend: Execute and Send (Computer's ID)
-Backend --> Backdoor: Send Python Commands
-Backdoor -> Backend: Execute Python Code And Send Output
+Backend --> Backdoor: Send info retrieving payload (python code)
+Backdoor -> Backend: Execute and Send back output
+
+loop Continuous Communication
+    Backend --> Backdoor: Send More Python Commands
+    Backdoor -> Backend: Execute Python Code And Send Output
+end
+
 @enduml

@@ -13,3 +13,13 @@ class SystemModule:
             return
     
         return user.processes 
+    
+    async def use_active_session(self, uuid):
+        user = self.user_repository.get_user(uuid)
+        if not user:
+            logging.error(f"User with uuid {uuid} not found")
+            return
+        
+        r = await user.execute("./modules/payloads/payload_use_active_session.py")
+        logging.info(r)
+        return {"message": "Active session is now being used."}
