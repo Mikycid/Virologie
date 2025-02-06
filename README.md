@@ -1,4 +1,4 @@
-# Main infection vector documentation
+# Virology Documentation
 
 - [Main infection vector documentation](#main-infection-vector-documentation)
 - [Overview](#overview)
