@@ -181,9 +181,9 @@ Same for the revshell.exe (which is written on disk later on) :
 
 ## Hybrid Analysis
 
-![hybrid analyzer results sandboxed](imgs/installer_hybrid_analyzer_sandboxed.png)
+![hybrid analyzer results sandboxed](./revshell/imgs/installer_hybrid_analyzer_sandboxed.png)
 
-![hybrid analyzer results static](imgs/installer_hybrid_analysis_static.png)
+![hybrid analyzer results static](./revshell/imgs/installer_hybrid_analysis_static.png)
 
 ## DocGuard
 
