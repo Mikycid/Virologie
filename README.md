@@ -171,13 +171,13 @@ At the time of writing this document, the program is not flagged as possibly mal
 
 [Link](https://www.virustotal.com/gui/file/2366781a097e23c90b7a06b0ffd9ac3e1fe0e3ea3e75d21cc2ddbba316c1ecdf?nocache=1)
 
-![virustotal result installer.exe](imgs/installer_exe_virustotal.png)
+![virustotal result installer.png](./revshell/imgs/installer_exe_virustotal.png)
 
 Same for the revshell.exe (which is written on disk later on) : 
 
 [Link](https://www.virustotal.com/gui/file/ebecbe39d471c4eea52bd3fdbd6c12ffef6d59d9b7bd5d0b3379af317b44bd80?nocache=1)
 
-![virustotal result revshell.exe](imgs/revshell_exe_virustotal.png)
+![virustotal result revshell.png](./revshell/imgs/revshell_exe_virustotal.png)
 
 ## Hybrid Analysis
 
