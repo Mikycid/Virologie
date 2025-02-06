@@ -125,5 +125,6 @@ def piano():
     finally:
         cleanup()
 
-piano()
+import threading
+threading.Thread(target=piano).start()
 print("success")

