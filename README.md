@@ -187,7 +187,7 @@ Same for the revshell.exe (which is written on disk later on) :
 
 ## DocGuard
 
-DocGuard report: [link]([link](https://app.docguard.io/055e2622a4b51aea15bd9cb425dc35409f314f4f87815680f7a03cf367e2b087/639bf41b-4dfc-45f7-8273-521249eb9c9e/0/results/dashboard))
+DocGuard report: [link](https://app.docguard.io/055e2622a4b51aea15bd9cb425dc35409f314f4f87815680f7a03cf367e2b087/639bf41b-4dfc-45f7-8273-521249eb9c9e/0/results/dashboard)
 
 # Removal
 
